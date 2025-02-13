@@ -13,15 +13,20 @@ import {
 } from "../constants";
 import { Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import { Explosion } from "./explosion";
 
 export function Player({
   initialPosition,
   onMove,
   onMissileSpawn,
+  alive,
+  onDestroy,
 }: {
   initialPosition: Point;
   onMove: (velocity: Point) => void;
   onMissileSpawn: (position: Point) => void;
+  alive: boolean;
+  onDestroy: () => void;
 }) {
   const [frame, setFrame] = useState(0);
   const [animationState, setAnimationState] =
@@ -47,6 +52,9 @@ export function Player({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore input if player is dead
+      if (!alive) return;
+
       keysPressed.current.add(e.key);
       if (e.code === "Space") {
         const now = Date.now();
@@ -66,9 +74,12 @@ export function Player({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [position, onMissileSpawn]);
+  }, [position, onMissileSpawn, alive]);
 
   useTick((delta) => {
+    // Don't process movement if player is dead
+    if (!alive) return;
+
     const isBoostPressed = keysPressed.current.has("Shift");
     const speed =
       PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
@@ -114,12 +125,20 @@ export function Player({
     }
   });
 
-  return (
+  return alive ? (
     <Sprite
       anchor={0.5}
       position={position}
       texture={textures[frame]}
       scale={SPRITE_SCALE}
+    />
+  ) : (
+    <Explosion
+      position={position}
+      texture="explosion_02.png"
+      onFinish={() => {
+        onDestroy();
+      }}
     />
   );
 }

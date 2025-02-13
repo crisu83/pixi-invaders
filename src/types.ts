@@ -5,6 +5,7 @@ export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
 export interface GameEntity {
   id: number;
   position: Point;
+  alive?: boolean;
 }
 
 export interface EnemyGridProps {

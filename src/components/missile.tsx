@@ -13,21 +13,21 @@ import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 export function Missile({
   initialPosition,
   onDestroy,
+  direction,
+  texture,
   onMove = () => {},
-  direction = [0, -1],
-  texture = "missile_01.png",
 }: {
   initialPosition: Point;
   onDestroy: () => void;
-  onMove: (position: Point) => void;
-  direction?: Point;
-  texture?: string;
+  direction: Point;
+  texture: string;
+  onMove?: (position: Point) => void;
 }) {
   const [, stageHeight] = STAGE_SIZE;
   const [, missileHeight] = MISSILE_SIZE;
 
-  const [frame, setFrame] = useState(0);
   const [position, setPosition] = useState<Point>(initialPosition);
+  const [frame, setFrame] = useState(0);
   const animationTime = useRef(0);
 
   const textures = useSpriteSheet({
@@ -37,7 +37,7 @@ export function Missile({
   });
 
   useTick((delta) => {
-    // Move missile in specified direction
+    // Move missile
     const newPosition: Point = [
       position[0] + MISSILE_SPEED * delta * direction[0],
       position[1] + MISSILE_SPEED * delta * direction[1],
@@ -45,19 +45,20 @@ export function Missile({
     setPosition(newPosition);
     onMove(newPosition);
 
-    // Animate missile
-    animationTime.current += delta * ANIMATION_SPEED;
-    if (animationTime.current >= 1) {
-      animationTime.current = 0;
-      setFrame((f) => (f + 1) % 2);
-    }
+    // Check if off screen and destroy
 
-    // Destroy missile when it's completely off screen
     if (
       newPosition[1] < -stageHeight / 2 - missileHeight ||
       newPosition[1] > stageHeight / 2 + missileHeight
     ) {
       onDestroy();
+    }
+
+    // Animate
+    animationTime.current += delta * ANIMATION_SPEED;
+    if (animationTime.current >= 1) {
+      animationTime.current = 0;
+      setFrame((f) => (f + 1) % 2);
     }
   });
 

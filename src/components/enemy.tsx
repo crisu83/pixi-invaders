@@ -3,8 +3,17 @@ import { useRef, useState } from "react";
 import { ENEMY_SIZE, SPRITE_SCALE, ANIMATION_SPEED } from "../constants";
 import { Point } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import { Explosion } from "./explosion";
 
-export function Enemy({ initialPosition }: { initialPosition: Point }) {
+export function Enemy({
+  initialPosition,
+  alive,
+  onDestroy,
+}: {
+  initialPosition: Point;
+  alive: boolean;
+  onDestroy: () => void;
+}) {
   const [frame, setFrame] = useState(0);
   const animationTime = useRef(0);
 
@@ -15,7 +24,9 @@ export function Enemy({ initialPosition }: { initialPosition: Point }) {
   });
 
   useTick((delta) => {
-    // Just handle animation
+    // Don't animate if not alive
+    if (!alive) return;
+
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
@@ -23,12 +34,20 @@ export function Enemy({ initialPosition }: { initialPosition: Point }) {
     }
   });
 
-  return (
+  return alive ? (
     <Sprite
       anchor={0.5}
       position={initialPosition}
       texture={textures[frame]}
       scale={SPRITE_SCALE}
+    />
+  ) : (
+    <Explosion
+      position={initialPosition}
+      texture="explosion_04.png"
+      onFinish={() => {
+        onDestroy();
+      }}
     />
   );
 }
