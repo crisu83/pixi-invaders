@@ -14,6 +14,7 @@ export const PLAYER_FRAMES: Record<PlayerAnimationState, [number, number]> = {
   TILT_LEFT: [2, 3],
   TILT_RIGHT: [4, 5],
 };
+export const PLAYER_MARGIN = 100; // Keep player this far from stage edges
 
 export const MISSILE_SIZE: Size = [5, 20];
 export const MISSILE_SPEED = 8;
@@ -22,10 +23,10 @@ export const MISSILE_COOLDOWN = 250;
 export const ENEMY_SIZE: Size = [20, 20];
 export const ENEMY_SPEED = 2;
 export const ENEMY_SPAWN_INTERVAL = 5000;
-
 export const ENEMY_ROWS = 3;
 export const ENEMIES_PER_ROW = 8;
 export const ENEMY_SPACING: Size = [60, 50]; // More horizontal and vertical space
 export const ENEMY_MARGIN = 100; // Keep enemies this far from stage edges
 
-export const PLAYER_MARGIN = 100; // Keep player this far from stage edges
+export const EXPLOSION_SIZE: Size = [20, 20];
+export const PLAYER_EXPLOSION_SIZE: Size = [32, 32];

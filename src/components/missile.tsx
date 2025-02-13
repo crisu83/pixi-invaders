@@ -13,11 +13,13 @@ import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 export function Missile({
   initialPosition,
   onDestroy,
+  onMove = () => {},
   direction = [0, -1],
   texture = "missile_01.png",
 }: {
   initialPosition: Point;
   onDestroy: () => void;
+  onMove: (position: Point) => void;
   direction?: Point;
   texture?: string;
 }) {
@@ -41,6 +43,7 @@ export function Missile({
       position[1] + MISSILE_SPEED * delta * direction[1],
     ];
     setPosition(newPosition);
+    onMove(newPosition);
 
     // Animate missile
     animationTime.current += delta * ANIMATION_SPEED;

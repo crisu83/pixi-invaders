@@ -7,6 +7,7 @@ import {
   ENEMIES_PER_ROW,
   ENEMY_SPACING,
   STAGE_SIZE,
+  PLAYER_SIZE,
 } from "../constants";
 import { Point } from "../types";
 import { GameEntity } from "../types";
@@ -14,13 +15,27 @@ import { Player } from "./player";
 import { EnemyGrid } from "./enemy-grid";
 import { Missile } from "./missile";
 import { Background } from "./background";
+import { Explosion } from "./explosion";
 
 export function GameScene() {
   const [stageWidth, stageHeight] = STAGE_SIZE;
-  const [enemies, setEnemies] = useState<GameEntity[]>([]);
+
   const [playerMissiles, setPlayerMissiles] = useState<GameEntity[]>([]);
+  const [playerPosition, setPlayerPosition] = useState<Point>([
+    0,
+    stageHeight / 3,
+  ]);
+  const [playerAlive, setPlayerAlive] = useState(true);
+  const [playerExplosion, setPlayerExplosion] = useState<GameEntity | null>(
+    null
+  );
+
+  const [enemies, setEnemies] = useState<GameEntity[]>([]);
   const [enemyMissiles, setEnemyMissiles] = useState<GameEntity[]>([]);
+  const [enemyExplosions, setEnemyExplosions] = useState<GameEntity[]>([]);
+
   const velocityRef = useRef<Point>([0, 0]);
+
   const nextEntityId = useRef(0);
 
   // Spawn initial enemies
@@ -41,7 +56,7 @@ export function GameScene() {
 
   // Game logic handlers
   useTick(() => {
-    // Handle collisions
+    // Handle collisions between player missiles and enemies
     playerMissiles.forEach((missile) => {
       enemies.forEach((enemy) => {
         const dx = Math.abs(missile.position[0] - enemy.position[0]);
@@ -53,13 +68,39 @@ export function GameScene() {
         ) {
           setPlayerMissiles((prev) => prev.filter((m) => m.id !== missile.id));
           setEnemies((prev) => prev.filter((e) => e.id !== enemy.id));
+          setEnemyExplosions((prev) => [
+            ...prev,
+            {
+              id: nextEntityId.current++,
+              position: enemy.position,
+            },
+          ]);
         }
       });
+    });
+
+    // Handle collisions between enemy missiles and player
+    enemyMissiles.forEach((missile) => {
+      const dx = Math.abs(missile.position[0] - playerPosition[0]);
+      const dy = Math.abs(missile.position[1] - playerPosition[1]);
+
+      if (
+        dx < (PLAYER_SIZE[0] + MISSILE_SIZE[0]) / 2 &&
+        dy < (PLAYER_SIZE[1] + MISSILE_SIZE[1]) / 2
+      ) {
+        setEnemyMissiles((prev) => prev.filter((m) => m.id !== missile.id));
+        setPlayerAlive(false);
+        setPlayerExplosion({
+          id: nextEntityId.current++,
+          position: playerPosition,
+        });
+      }
     });
   });
 
   const handlePlayerMove = useCallback((velocity: Point) => {
     velocityRef.current = velocity;
+    setPlayerPosition((prev) => [prev[0], prev[1]]);
   }, []);
 
   const handleMissileSpawn = useCallback((position: Point) => {
@@ -97,6 +138,13 @@ export function GameScene() {
           <Missile
             key={missile.id}
             initialPosition={missile.position}
+            onMove={(newPosition) => {
+              setPlayerMissiles((prev) =>
+                prev.map((m) =>
+                  m.id === missile.id ? { ...m, position: newPosition } : m
+                )
+              );
+            }}
             onDestroy={() => {
               setPlayerMissiles((prev) =>
                 prev.filter((m) => m.id !== missile.id)
@@ -110,6 +158,13 @@ export function GameScene() {
             initialPosition={missile.position}
             direction={[0, 1]}
             texture="missile_02.png"
+            onMove={(newPosition) => {
+              setEnemyMissiles((prev) =>
+                prev.map((m) =>
+                  m.id === missile.id ? { ...m, position: newPosition } : m
+                )
+              );
+            }}
             onDestroy={() => {
               setEnemyMissiles((prev) =>
                 prev.filter((m) => m.id !== missile.id)
@@ -117,11 +172,32 @@ export function GameScene() {
             }}
           />
         ))}
-        <Player
-          initialPosition={[0, stageHeight / 3]}
-          onMove={handlePlayerMove}
-          onMissileSpawn={handleMissileSpawn}
-        />
+        {playerAlive && (
+          <Player
+            initialPosition={playerPosition}
+            onMove={handlePlayerMove}
+            onMissileSpawn={handleMissileSpawn}
+          />
+        )}
+        {enemyExplosions.map((explosion) => (
+          <Explosion
+            key={explosion.id}
+            position={explosion.position}
+            texture="explosion_04.png"
+            onFinish={() => {
+              setEnemyExplosions((prev) =>
+                prev.filter((e) => e.id !== explosion.id)
+              );
+            }}
+          />
+        ))}
+        {playerExplosion && (
+          <Explosion
+            key={playerExplosion.id}
+            position={playerExplosion.position}
+            onFinish={() => setPlayerExplosion(null)}
+          />
+        )}
       </Container>
     </>
   );
