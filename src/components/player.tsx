@@ -9,6 +9,8 @@ import {
   ANIMATION_SPEED,
   SPRITE_SCALE,
   MISSLE_COOLDOWN,
+  STAGE_SIZE,
+  PLAYER_BOOST_MULTIPLIER,
 } from "../constants";
 import { Missile } from "./missile";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
@@ -31,6 +33,17 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
   const [missiles, setMissiles] = useState<number[]>([]);
   const nextMissileId = useRef(0);
   const lastShotTime = useRef(0);
+
+  const [stageWidth, stageHeight] = STAGE_SIZE;
+  const [playerWidth, playerHeight] = PLAYER_SIZE;
+  const scaledWidth = playerWidth * SPRITE_SCALE;
+  const scaledHeight = playerHeight * SPRITE_SCALE;
+
+  // Calculate boundaries once
+  const leftBound = -(stageWidth - scaledWidth) / 2;
+  const rightBound = (stageWidth - scaledWidth) / 2;
+  const topBound = -(stageHeight - scaledHeight) / 2;
+  const bottomBound = (stageHeight - scaledHeight) / 2;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,30 +70,47 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
   }, []);
 
   useTick((delta) => {
-    const speed = PLAYER_SPEED * delta;
+    const isBoostPressed = keysPressed.current.has("Shift");
+    const speed =
+      PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
     const newPos: Point = [...position];
     velocity.current = [0, 0];
 
-    // Update movement and animation state
     let newAnimationState: PlayerAnimationState = "IDLE";
 
     if (keysPressed.current.has("ArrowLeft")) {
-      newPos[0] -= speed;
-      velocity.current[0] = -1;
+      const nextX = Math.max(leftBound, newPos[0] - speed);
+      newPos[0] = nextX;
+      if (nextX > leftBound) {
+        velocity.current[0] =
+          -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+      }
       newAnimationState = "TILT_LEFT";
     }
     if (keysPressed.current.has("ArrowRight")) {
-      newPos[0] += speed;
-      velocity.current[0] = 1;
+      const nextX = Math.min(rightBound, newPos[0] + speed);
+      newPos[0] = nextX;
+      if (nextX < rightBound) {
+        velocity.current[0] =
+          1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+      }
       newAnimationState = "TILT_RIGHT";
     }
     if (keysPressed.current.has("ArrowUp")) {
-      newPos[1] -= speed;
-      velocity.current[1] = -1;
+      const nextY = Math.max(topBound, newPos[1] - speed);
+      newPos[1] = nextY;
+      if (nextY > topBound) {
+        velocity.current[1] =
+          -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+      }
     }
     if (keysPressed.current.has("ArrowDown")) {
-      newPos[1] += speed;
-      velocity.current[1] = 1;
+      const nextY = Math.min(bottomBound, newPos[1] + speed);
+      newPos[1] = nextY;
+      if (nextY < bottomBound) {
+        velocity.current[1] =
+          1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+      }
     }
 
     setPosition(newPos);
