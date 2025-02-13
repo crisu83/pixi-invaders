@@ -1,40 +1,34 @@
 import { Container, useTick } from "@pixi/react";
 import { useRef, useState } from "react";
 import {
-  Point,
   ENEMY_SIZE,
   ENEMY_SPEED,
   ENEMY_MARGIN,
   MISSILE_COOLDOWN,
+  MISSILE_SIZE,
 } from "../constants";
 import { Enemy } from "./enemy";
 import { STAGE_SIZE } from "../constants";
 import { Missile } from "./missile";
-
-interface EnemyGridProps {
-  enemies: { id: number; position: Point }[];
-  onEnemyDestroyed: () => void;
-  onUpdateEnemies: (enemies: { id: number; position: Point }[]) => void;
-}
-
-// Add missile interface
-interface EnemyMissile {
-  id: number;
-  position: Point;
-}
+import { GameEntity, Point } from "../types";
 
 export function EnemyGrid({
   enemies,
-  onEnemyDestroyed,
   onUpdateEnemies,
-}: EnemyGridProps) {
+  onMissileSpawn,
+}: {
+  enemies: GameEntity[];
+  onUpdateEnemies: (enemies: GameEntity[]) => void;
+  onMissileSpawn: (position: Point) => void;
+}) {
   const [stageWidth] = STAGE_SIZE;
   const enemyDirection = useRef(1);
-  const [missiles, setMissiles] = useState<EnemyMissile[]>([]);
+  const [missiles, setMissiles] = useState<GameEntity[]>([]);
   const lastFireTime = useRef(0);
   const nextMissileId = useRef(0);
 
   useTick((delta) => {
+    // Handle enemy movement
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
     let needsToMoveDown = false;
 
@@ -48,8 +42,6 @@ export function EnemyGrid({
       needsToMoveDown = true;
     }
 
-    onEnemyDestroyed();
-
     onUpdateEnemies(
       enemies.map((enemy) => ({
         ...enemy,
@@ -59,6 +51,23 @@ export function EnemyGrid({
         ] as Point,
       }))
     );
+
+    // Handle collisions
+    missiles.forEach((missile) => {
+      enemies.forEach((enemy) => {
+        const dx = Math.abs(missile.position[0] - enemy.position[0]);
+        const dy = Math.abs(missile.position[1] - enemy.position[1]);
+
+        if (
+          dx < (ENEMY_SIZE[0] + MISSILE_SIZE[0]) / 2 &&
+          dy < (ENEMY_SIZE[1] + MISSILE_SIZE[1]) / 2
+        ) {
+          // Assuming onEnemyDestroyed is called elsewhere in the code
+          // onEnemyDestroyed(enemy.id);
+          // onMissileDestroyed(missile.id);
+        }
+      });
+    });
 
     // Random firing logic
     const currentTime = Date.now();
@@ -83,6 +92,7 @@ export function EnemyGrid({
         if (frontEnemies.length > 0) {
           const shooter =
             frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
+          onMissileSpawn(shooter.position);
           setMissiles((prev) => [
             ...prev,
             {

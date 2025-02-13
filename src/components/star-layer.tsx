@@ -1,7 +1,8 @@
 import { TilingSprite, useTick } from "@pixi/react";
 import { Texture } from "pixi.js";
 import { useState } from "react";
-import { Point, STAGE_SIZE, SPRITE_SCALE } from "../constants";
+import { Point } from "../types";
+import { STAGE_SIZE, SPRITE_SCALE } from "../constants";
 
 export function StarLayer({
   texture,

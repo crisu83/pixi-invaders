@@ -1,12 +1,9 @@
-export type Point = [number, number];
-export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
-export type Size = [number, number];
+import { Size, PlayerAnimationState } from "./types";
 
 export const SPRITE_SCALE = 1;
 export const ANIMATION_SPEED = 0.1;
 
 export const STAGE_SIZE: Size = [800, 600];
-
 export const STARS_SIZE: Size = [128, 128];
 
 export const PLAYER_SIZE: Size = [20, 20];

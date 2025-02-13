@@ -1,6 +1,7 @@
 import { Sprite, useTick } from "@pixi/react";
 import { useRef, useState } from "react";
-import { Point, ENEMY_SIZE, SPRITE_SCALE, ANIMATION_SPEED } from "../constants";
+import { ENEMY_SIZE, SPRITE_SCALE, ANIMATION_SPEED } from "../constants";
+import { Point } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 
 export function Enemy({ initialPosition }: { initialPosition: Point }) {

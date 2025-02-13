@@ -1,5 +1,6 @@
 import { Container } from "@pixi/react";
-import { Point, STARS_SIZE } from "../constants";
+import { Point } from "../types";
+import { STARS_SIZE } from "../constants";
 import { StarLayer } from "./star-layer";
 import { useTexture } from "../hooks/use-texture";
 

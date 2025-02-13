@@ -1,8 +1,6 @@
 import { Sprite, useTick } from "@pixi/react";
 import { useRef, useState, useEffect } from "react";
 import {
-  Point,
-  PlayerAnimationState,
   PLAYER_FRAMES,
   PLAYER_SIZE,
   PLAYER_SPEED,
@@ -13,15 +11,17 @@ import {
   PLAYER_BOOST_MULTIPLIER,
   PLAYER_MARGIN,
 } from "../constants";
-import { Missile } from "./missile";
+import { Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 
 export function Player({
   initialPosition,
   onMove,
+  onMissileSpawn,
 }: {
   initialPosition: Point;
   onMove: (velocity: Point) => void;
+  onMissileSpawn: (position: Point) => void;
 }) {
   const [frame, setFrame] = useState(0);
   const [animationState, setAnimationState] =
@@ -37,8 +37,6 @@ export function Player({
   const [position, setPosition] = useState<Point>(initialPosition);
   const keysPressed = useRef<Set<string>>(new Set());
   const velocity = useRef<Point>([0, 0]);
-  const [missiles, setMissiles] = useState<number[]>([]);
-  const nextMissileId = useRef(0);
   const lastShotTime = useRef(0);
 
   const [stageWidth] = STAGE_SIZE;
@@ -50,11 +48,10 @@ export function Player({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keysPressed.current.add(e.key);
-      // Fire missile on space with cooldown
       if (e.code === "Space") {
         const now = Date.now();
         if (now - lastShotTime.current >= MISSILE_COOLDOWN) {
-          setMissiles((prev) => [...prev, nextMissileId.current++]);
+          onMissileSpawn(position);
           lastShotTime.current = now;
         }
       }
@@ -69,7 +66,7 @@ export function Player({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [position, onMissileSpawn]);
 
   useTick((delta) => {
     const isBoostPressed = keysPressed.current.has("Shift");
@@ -118,22 +115,11 @@ export function Player({
   });
 
   return (
-    <>
-      <Sprite
-        anchor={0.5}
-        position={position}
-        texture={textures[frame]}
-        scale={SPRITE_SCALE}
-      />
-      {missiles.map((id) => (
-        <Missile
-          key={id}
-          initialPosition={position}
-          onDestroy={() => {
-            setMissiles((prev) => prev.filter((m) => m !== id));
-          }}
-        />
-      ))}
-    </>
+    <Sprite
+      anchor={0.5}
+      position={position}
+      texture={textures[frame]}
+      scale={SPRITE_SCALE}
+    />
   );
 }

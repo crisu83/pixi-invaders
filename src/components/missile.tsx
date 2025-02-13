@@ -1,28 +1,26 @@
 import { Sprite, useTick } from "@pixi/react";
 import { useRef, useState } from "react";
 import {
-  Point,
   MISSILE_SPEED,
   ANIMATION_SPEED,
   MISSILE_SIZE,
   STAGE_SIZE,
   SPRITE_SCALE,
 } from "../constants";
+import { Point } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
-
-interface MissileProps {
-  initialPosition: Point;
-  onDestroy: () => void;
-  direction?: Point;
-  texture?: string;
-}
 
 export function Missile({
   initialPosition,
   onDestroy,
   direction = [0, -1],
   texture = "missile_01.png",
-}: MissileProps) {
+}: {
+  initialPosition: Point;
+  onDestroy: () => void;
+  direction?: Point;
+  texture?: string;
+}) {
   const [, stageHeight] = STAGE_SIZE;
   const [, missileHeight] = MISSILE_SIZE;
 
