@@ -25,9 +25,9 @@ export function Background({
 
   return (
     <Container>
-      <StarLayer texture={stars1} speed={0.1} velocityRef={velocityRef} />
-      <StarLayer texture={stars2} speed={0.3} velocityRef={velocityRef} />
-      <StarLayer texture={stars3} speed={0.5} velocityRef={velocityRef} />
+      <StarLayer texture={stars1} speed={0.2} velocityRef={velocityRef} />
+      <StarLayer texture={stars2} speed={0.4} velocityRef={velocityRef} />
+      <StarLayer texture={stars3} speed={0.6} velocityRef={velocityRef} />
     </Container>
   );
 }

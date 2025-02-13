@@ -8,9 +8,10 @@ import {
   PLAYER_SPEED,
   ANIMATION_SPEED,
   SPRITE_SCALE,
-  MISSLE_COOLDOWN,
+  MISSILE_COOLDOWN,
   STAGE_SIZE,
   PLAYER_BOOST_MULTIPLIER,
+  PLAYER_MARGIN,
 } from "../constants";
 import { Missile } from "./missile";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
@@ -40,16 +41,11 @@ export function Player({
   const nextMissileId = useRef(0);
   const lastShotTime = useRef(0);
 
-  const [stageWidth, stageHeight] = STAGE_SIZE;
-  const [playerWidth, playerHeight] = PLAYER_SIZE;
-  const scaledWidth = playerWidth * SPRITE_SCALE;
-  const scaledHeight = playerHeight * SPRITE_SCALE;
+  const [stageWidth] = STAGE_SIZE;
 
   // Calculate boundaries once
-  const leftBound = -(stageWidth - scaledWidth) / 2;
-  const rightBound = (stageWidth - scaledWidth) / 2;
-  const topBound = -(stageHeight - scaledHeight) / 2;
-  const bottomBound = (stageHeight - scaledHeight) / 2;
+  const leftBound = -(stageWidth - PLAYER_MARGIN * 2) / 2;
+  const rightBound = (stageWidth - PLAYER_MARGIN * 2) / 2;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +53,7 @@ export function Player({
       // Fire missile on space with cooldown
       if (e.code === "Space") {
         const now = Date.now();
-        if (now - lastShotTime.current >= MISSLE_COOLDOWN) {
+        if (now - lastShotTime.current >= MISSILE_COOLDOWN) {
           setMissiles((prev) => [...prev, nextMissileId.current++]);
           lastShotTime.current = now;
         }
@@ -102,24 +98,8 @@ export function Player({
       }
       newAnimationState = "TILT_RIGHT";
     }
-    if (keysPressed.current.has("ArrowUp")) {
-      const nextY = Math.max(topBound, newPos[1] - speed);
-      newPos[1] = nextY;
-      if (nextY > topBound) {
-        velocity.current[1] =
-          -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-      }
-    }
-    if (keysPressed.current.has("ArrowDown")) {
-      const nextY = Math.min(bottomBound, newPos[1] + speed);
-      newPos[1] = nextY;
-      if (nextY < bottomBound) {
-        velocity.current[1] =
-          1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-      }
-    }
 
-    setPosition(newPos);
+    setPosition([newPos[0], initialPosition[1]]); // Keep Y position fixed at initial value
     onMove(velocity.current);
     setAnimationState(newAnimationState);
 
@@ -129,11 +109,9 @@ export function Player({
       animationTime.current = 0;
       const [firstFrame, lastFrame] = PLAYER_FRAMES[animationState];
       setFrame((f) => {
-        // If current frame isn't in the current animation range, start from first frame
         if (f < firstFrame || f > lastFrame) {
           return firstFrame;
         }
-        // Otherwise alternate between first and last frame
         return f === firstFrame ? lastFrame : firstFrame;
       });
     }

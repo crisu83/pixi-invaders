@@ -2,7 +2,7 @@ export type Point = [number, number];
 export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
 export type Size = [number, number];
 
-export const SPRITE_SCALE = 2;
+export const SPRITE_SCALE = 1;
 export const ANIMATION_SPEED = 0.1;
 
 export const STAGE_SIZE: Size = [800, 600];
@@ -20,7 +20,7 @@ export const PLAYER_FRAMES: Record<PlayerAnimationState, [number, number]> = {
 
 export const MISSILE_SIZE: Size = [5, 20];
 export const MISSILE_SPEED = 8;
-export const MISSLE_COOLDOWN = 250;
+export const MISSILE_COOLDOWN = 250;
 
 export const ENEMY_SIZE: Size = [20, 20];
 export const ENEMY_SPEED = 2;
@@ -30,3 +30,5 @@ export const ENEMY_ROWS = 3;
 export const ENEMIES_PER_ROW = 8;
 export const ENEMY_SPACING: Size = [60, 50]; // More horizontal and vertical space
 export const ENEMY_MARGIN = 100; // Keep enemies this far from stage edges
+
+export const PLAYER_MARGIN = 100; // Keep player this far from stage edges
