@@ -15,7 +15,13 @@ import {
 import { Missile } from "./missile";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 
-export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
+export function Player({
+  initialPosition,
+  onMove,
+}: {
+  initialPosition: Point;
+  onMove: (velocity: Point) => void;
+}) {
   const [frame, setFrame] = useState(0);
   const [animationState, setAnimationState] =
     useState<PlayerAnimationState>("IDLE");
@@ -27,7 +33,7 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
     size: PLAYER_SIZE,
   });
 
-  const [position, setPosition] = useState<Point>([0, 0]);
+  const [position, setPosition] = useState<Point>(initialPosition);
   const keysPressed = useRef<Set<string>>(new Set());
   const velocity = useRef<Point>([0, 0]);
   const [missiles, setMissiles] = useState<number[]>([]);

@@ -18,8 +18,8 @@ export function StarLayer({
 
   useTick((delta) => {
     setPosition([
-      Math.round(position[0] - velocityRef.current![0] * speed * delta * 10),
-      Math.round(position[1] - velocityRef.current![1] * speed * delta * 10),
+      Math.round(position[0] - velocityRef.current![0] * speed * delta * 5),
+      Math.round(position[1] - velocityRef.current![1] * speed * delta * 5),
     ]);
   });
 
