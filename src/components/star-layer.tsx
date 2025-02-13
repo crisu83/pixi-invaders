@@ -1,7 +1,7 @@
 import { TilingSprite, useTick } from "@pixi/react";
 import { Texture } from "pixi.js";
 import { useState } from "react";
-import { Point, STAGE_HEIGHT, STAGE_WIDTH } from "../constants";
+import { Point, STAGE_SIZE, SPRITE_SCALE } from "../constants";
 
 export function StarLayer({
   texture,
@@ -12,6 +12,8 @@ export function StarLayer({
   speed: number;
   velocityRef: React.RefObject<Point>;
 }) {
+  const [stageWidth, stageHeight] = STAGE_SIZE;
+
   const [position, setPosition] = useState<Point>([0, 0]);
 
   useTick((delta) => {
@@ -24,9 +26,9 @@ export function StarLayer({
   return (
     <TilingSprite
       texture={texture}
-      width={STAGE_WIDTH}
-      height={STAGE_HEIGHT}
-      scale={1}
+      width={stageWidth}
+      height={stageHeight}
+      scale={SPRITE_SCALE}
       tilePosition={[position[0], position[1]]}
     />
   );

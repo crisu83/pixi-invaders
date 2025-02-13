@@ -1,14 +1,17 @@
 import { Sprite, useTick } from "@pixi/react";
-import { Texture, Rectangle } from "pixi.js";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Point,
   PlayerAnimationState,
-  FRAMES,
+  PLAYER_FRAMES,
   PLAYER_SIZE,
   PLAYER_SPEED,
   ANIMATION_SPEED,
+  SPRITE_SCALE,
+  MISSLE_COOLDOWN,
 } from "../constants";
+import { Missile } from "./missile";
+import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 
 export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
   const [frame, setFrame] = useState(0);
@@ -16,46 +19,30 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
     useState<PlayerAnimationState>("IDLE");
   const animationTime = useRef(0);
 
-  const textures = useMemo(
-    () => [
-      // Idle frames
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(0, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(PLAYER_SIZE, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-      // Left tilt frames
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(PLAYER_SIZE * 2, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(PLAYER_SIZE * 3, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-      // Right tilt frames
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(PLAYER_SIZE * 4, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-      new Texture(
-        Texture.from("/sprites/ship_01.png").baseTexture,
-        new Rectangle(PLAYER_SIZE * 5, 0, PLAYER_SIZE, PLAYER_SIZE)
-      ),
-    ],
-    []
-  );
+  const textures = useSpriteSheet({
+    path: "/sprites/ship_01.png",
+    frameCount: 6,
+    size: PLAYER_SIZE,
+  });
 
   const [position, setPosition] = useState<Point>([0, 0]);
   const keysPressed = useRef<Set<string>>(new Set());
   const velocity = useRef<Point>([0, 0]);
+  const [missiles, setMissiles] = useState<number[]>([]);
+  const nextMissileId = useRef(0);
+  const lastShotTime = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keysPressed.current.add(e.key);
+      // Fire missile on space with cooldown
+      if (e.code === "Space") {
+        const now = Date.now();
+        if (now - lastShotTime.current >= MISSLE_COOLDOWN) {
+          setMissiles((prev) => [...prev, nextMissileId.current++]);
+          lastShotTime.current = now;
+        }
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       keysPressed.current.delete(e.key);
@@ -104,7 +91,7 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
-      const [firstFrame, lastFrame] = FRAMES[animationState];
+      const [firstFrame, lastFrame] = PLAYER_FRAMES[animationState];
       setFrame((f) => {
         // If current frame isn't in the current animation range, start from first frame
         if (f < firstFrame || f > lastFrame) {
@@ -116,5 +103,23 @@ export function Player({ onMove }: { onMove: (velocity: Point) => void }) {
     }
   });
 
-  return <Sprite anchor={0.5} position={position} texture={textures[frame]} />;
+  return (
+    <>
+      <Sprite
+        anchor={0.5}
+        position={position}
+        texture={textures[frame]}
+        scale={SPRITE_SCALE}
+      />
+      {missiles.map((id) => (
+        <Missile
+          key={id}
+          initialPosition={position}
+          onDestroy={() => {
+            setMissiles((prev) => prev.filter((m) => m !== id));
+          }}
+        />
+      ))}
+    </>
+  );
 }
