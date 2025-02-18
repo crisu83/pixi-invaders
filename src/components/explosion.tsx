@@ -7,11 +7,11 @@ import { useSpriteSheet } from "../hooks/use-sprite-sheet";
 export function Explosion({
   position,
   texture,
-  onFinish,
+  onComplete,
 }: {
   position: Point;
   texture: string;
-  onFinish: () => void;
+  onComplete: () => void;
 }) {
   const frameCount = 5;
   const [frame, setFrame] = useState(0);
@@ -34,7 +34,7 @@ export function Explosion({
         const next = f + 1;
         if (next >= frameCount) {
           setDone(true);
-          onFinish();
+          onComplete();
           return f;
         }
         return next;

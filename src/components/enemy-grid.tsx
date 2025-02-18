@@ -9,30 +9,28 @@ import {
 import { Enemy } from "./enemy";
 import { STAGE_SIZE } from "../constants";
 import { GameEntity, Point } from "../types";
+import { isAlive } from "../utils/entity";
 
 export function EnemyGrid({
   enemies,
   onUpdateEnemies,
   onMissileSpawn,
-  onEnemyDestroy,
 }: {
   enemies: GameEntity[];
   onUpdateEnemies: (enemies: GameEntity[]) => void;
   onMissileSpawn: (position: Point) => void;
-  onEnemyDestroy: (id: number) => void;
 }) {
   const [stageWidth] = STAGE_SIZE;
   const enemyDirection = useRef(1);
   const lastFireTime = useRef(0);
 
   useTick((delta) => {
-    // Handle enemy movement
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
     let needsToMoveDown = false;
 
     // Only check boundary collisions for alive enemies
     const wouldHitBoundary = enemies.some((enemy) => {
-      if (enemy.alive === false) return false;
+      if (!isAlive(enemy)) return false;
       const newX = enemy.position[0] + moveAmount;
       return Math.abs(newX) > (stageWidth - ENEMY_MARGIN * 2) / 2;
     });
@@ -45,7 +43,7 @@ export function EnemyGrid({
     onUpdateEnemies(
       enemies.map((enemy) => {
         // Don't move dead enemies
-        if (enemy.alive === false) return enemy;
+        if (!isAlive(enemy)) return enemy;
 
         return {
           ...enemy,
@@ -62,7 +60,9 @@ export function EnemyGrid({
     if (currentTime - lastFireTime.current > MISSILE_COOLDOWN) {
       if (Math.random() < 0.02 && enemies.length > 0) {
         const columns = new Map<number, { position: Point; lowestY: number }>();
-        enemies.forEach((enemy) => {
+
+        // Only consider alive enemies
+        for (const enemy of enemies.filter(isAlive)) {
           const x = Math.round(enemy.position[0]);
           const current = columns.get(x);
           if (!current || enemy.position[1] > current.lowestY) {
@@ -71,7 +71,7 @@ export function EnemyGrid({
               lowestY: enemy.position[1],
             });
           }
-        });
+        }
 
         const frontEnemies = Array.from(columns.values());
         if (frontEnemies.length > 0) {
@@ -89,9 +89,8 @@ export function EnemyGrid({
       {enemies.map((enemy) => (
         <Enemy
           key={enemy.id}
-          initialPosition={enemy.position}
-          alive={enemy.alive !== false}
-          onDestroy={() => onEnemyDestroy(enemy.id)}
+          position={enemy.position}
+          alive={isAlive(enemy)}
         />
       ))}
     </Container>

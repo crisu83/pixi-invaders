@@ -1,5 +1,5 @@
 import { Sprite, useTick } from "@pixi/react";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PLAYER_FRAMES,
   PLAYER_SIZE,
@@ -13,20 +13,17 @@ import {
 } from "../constants";
 import { Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
-import { Explosion } from "./explosion";
 
 export function Player({
   initialPosition,
   onMove,
   onMissileSpawn,
   alive,
-  onDestroy,
 }: {
   initialPosition: Point;
   onMove: (velocity: Point) => void;
   onMissileSpawn: (position: Point) => void;
   alive: boolean;
-  onDestroy: () => void;
 }) {
   const [frame, setFrame] = useState(0);
   const [animationState, setAnimationState] =
@@ -39,7 +36,6 @@ export function Player({
     size: PLAYER_SIZE,
   });
 
-  const [position, setPosition] = useState<Point>(initialPosition);
   const keysPressed = useRef<Set<string>>(new Set());
   const velocity = useRef<Point>([0, 0]);
   const lastShotTime = useRef(0);
@@ -52,14 +48,12 @@ export function Player({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore input if player is dead
       if (!alive) return;
-
       keysPressed.current.add(e.key);
       if (e.code === "Space") {
         const now = Date.now();
         if (now - lastShotTime.current >= MISSILE_COOLDOWN) {
-          onMissileSpawn(position);
+          onMissileSpawn(initialPosition);
           lastShotTime.current = now;
         }
       }
@@ -74,16 +68,16 @@ export function Player({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [position, onMissileSpawn, alive]);
+  }, [initialPosition, onMissileSpawn, alive]);
 
   useTick((delta) => {
-    // Don't process movement if player is dead
+    // Don't update position or animate if not alive
     if (!alive) return;
 
     const isBoostPressed = keysPressed.current.has("Shift");
     const speed =
       PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-    const newPos: Point = [...position];
+    const newPos: Point = [...initialPosition];
     velocity.current = [0, 0];
 
     let newAnimationState: PlayerAnimationState = "IDLE";
@@ -107,7 +101,6 @@ export function Player({
       newAnimationState = "TILT_RIGHT";
     }
 
-    setPosition([newPos[0], initialPosition[1]]); // Keep Y position fixed at initial value
     onMove(velocity.current);
     setAnimationState(newAnimationState);
 
@@ -127,18 +120,10 @@ export function Player({
 
   return alive ? (
     <Sprite
-      anchor={0.5}
-      position={position}
       texture={textures[frame]}
+      anchor={0.5}
+      position={initialPosition}
       scale={SPRITE_SCALE}
     />
-  ) : (
-    <Explosion
-      position={position}
-      texture="explosion_02.png"
-      onFinish={() => {
-        onDestroy();
-      }}
-    />
-  );
+  ) : null;
 }
