@@ -1,8 +1,9 @@
-import { TextStyle } from "pixi.js";
+import { TextStyle, TextStyleFontWeight } from "pixi.js";
 
 const baseStyle = {
   fill: "white",
   fontFamily: "Inter",
+  fontWeight: "700" as TextStyleFontWeight,
   align: "center" as const,
   letterSpacing: 2,
 };
