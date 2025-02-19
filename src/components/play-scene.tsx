@@ -57,10 +57,22 @@ export function PlayScene({
     setEnemies(newEnemies);
   }, [stageHeight]);
 
+  const handlePlayerDeath = useCallback(() => {
+    setPlayer((prev) => setAlive(prev, false));
+    setExplosions((prev) => [...prev, player]);
+    setTimeout(onGameOver, 1000);
+  }, [player, onGameOver]);
+
   useTick(() => {
     // Check for victory when all enemies are destroyed
     if (enemies.length === 0) {
       onVictory(score);
+      return;
+    }
+
+    // Check if enemies have reached the player's height
+    if (enemies.some((enemy) => enemy.position[1] >= player.position[1])) {
+      handlePlayerDeath();
       return;
     }
 
@@ -77,18 +89,12 @@ export function PlayScene({
       }
     }
 
-    // Only check enemy missiles if player is alive
-    if (isAlive(player)) {
-      for (const missile of enemyMissiles) {
-        if (checkCollision(missile, player, MISSILE_SIZE, PLAYER_SIZE)) {
-          setEnemyMissiles((prev) => prev.filter((m) => m.id !== missile.id));
-          setPlayer((prev) => setAlive(prev, false));
-          setExplosions((prev) => [...prev, player]);
-
-          // Wait for explosion animation to finish
-          setTimeout(onGameOver, 1000);
-          break;
-        }
+    // Check enemy missiles vs player
+    for (const missile of enemyMissiles) {
+      if (checkCollision(missile, player, MISSILE_SIZE, PLAYER_SIZE)) {
+        setEnemyMissiles((prev) => prev.filter((m) => m.id !== missile.id));
+        handlePlayerDeath();
+        break;
       }
     }
   });
