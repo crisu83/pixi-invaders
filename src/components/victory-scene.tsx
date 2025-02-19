@@ -1,29 +1,16 @@
-import { Container, Text } from "@pixi/react";
-import { useTextStyle } from "../hooks/use-text-style";
+import { Container } from "@pixi/react";
 import { STAGE_SIZE } from "../constants";
+import { TitleText, FinalScoreText, PressAnyKeyText } from "./text";
 
 export function VictoryScene({ score }: { score: number }) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
-  const titleStyle = useTextStyle({ fontSize: 48 });
-  const subtitleStyle = useTextStyle({ fontSize: 24 });
-
   return (
-    <Container position={[stageWidth / 2, stageHeight / 2]} pivot={[0, 0]}>
-      <Container>
-        <Text text="VICTORY!" anchor={[0.5, 0.5]} style={titleStyle} />
-        <Text
-          text={`FINAL SCORE ${score.toString().padStart(4, "0")}`}
-          anchor={[0.5, 0.5]}
-          y={60}
-          style={subtitleStyle}
-        />
-        <Text
-          text="press any key to restart"
-          anchor={[0.5, 0.5]}
-          y={120}
-          style={subtitleStyle}
-        />
+    <Container position={[stageWidth / 2, stageHeight / 2]}>
+      <Container position={[0, -60]}>
+        <TitleText>VICTORY!</TitleText>
+        <FinalScoreText score={score} y={60} />
+        <PressAnyKeyText y={120} />
       </Container>
     </Container>
   );

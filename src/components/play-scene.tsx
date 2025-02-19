@@ -18,13 +18,13 @@ import { Background } from "./background";
 import { createEntity } from "../utils/entity-factory";
 import { isAlive, setAlive } from "../utils/entity";
 import { ExplosionGroup } from "./explosion-group";
-import { Score } from "./score";
+import { ScoreText } from "./text";
 
 export function PlayScene({
   onGameOver,
   onVictory,
 }: {
-  onGameOver: () => void;
+  onGameOver: (score: number) => void;
   onVictory: (score: number) => void;
 }) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
@@ -60,8 +60,8 @@ export function PlayScene({
   const handlePlayerDeath = useCallback(() => {
     setPlayer((prev) => setAlive(prev, false));
     setExplosions((prev) => [...prev, player]);
-    setTimeout(onGameOver, 1000);
-  }, [player, onGameOver]);
+    setTimeout(() => onGameOver(score), 1000);
+  }, [player, onGameOver, score]);
 
   useTick(() => {
     // Check for victory when all enemies are destroyed
@@ -127,7 +127,7 @@ export function PlayScene({
         <Background velocityRef={velocityRef} />
       </Container>
       <Container position={[stageWidth / 2, stageHeight / 2]}>
-        <Score
+        <ScoreText
           value={score}
           position={[-stageWidth / 2 + 20, -stageHeight / 2 + 20]}
         />

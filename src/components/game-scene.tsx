@@ -32,11 +32,14 @@ export function GameScene() {
     case "VICTORY":
       return <VictoryScene score={score} />;
     case "GAME_OVER":
-      return <GameOverScene />;
+      return <GameOverScene score={score} />;
     case "PLAYING":
       return (
         <PlayScene
-          onGameOver={() => setGameState("GAME_OVER")}
+          onGameOver={(finalScore: number) => {
+            setScore(finalScore);
+            setGameState("GAME_OVER");
+          }}
           onVictory={(finalScore: number) => {
             setScore(finalScore);
             setGameState("VICTORY");
