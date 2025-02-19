@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Texture, Rectangle } from "pixi.js";
-import { Size } from "../constants";
+import { Size } from "../types";
 import { useTexture } from "./use-texture";
 
 type SpriteConfig = {
