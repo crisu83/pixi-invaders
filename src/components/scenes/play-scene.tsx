@@ -18,14 +18,12 @@ import { Background } from "../background";
 import { createEntity } from "../../utils/entity-factory";
 import { isAlive, setAlive } from "../../utils/entity";
 import { ExplosionGroup } from "../explosion-group";
+import { Score } from "../score";
 
-interface PlaySceneProps {
-  onGameOver: () => void;
-}
-
-export function PlayScene({ onGameOver }: PlaySceneProps) {
+export function PlayScene({ onGameOver }: { onGameOver: () => void }) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
   const checkCollision = useCollisionDetection();
+  const [score, setScore] = useState(0);
 
   // Player state
   const [player, setPlayer] = useState(
@@ -61,6 +59,7 @@ export function PlayScene({ onGameOver }: PlaySceneProps) {
           setPlayerMissiles((prev) => prev.filter((m) => m.id !== missile.id));
           setExplosions((prev) => [...prev, enemy]);
           setEnemies((prev) => prev.filter((e) => e.id !== enemy.id));
+          setScore((prev) => prev + 100);
           break;
         }
       }
@@ -110,6 +109,10 @@ export function PlayScene({ onGameOver }: PlaySceneProps) {
         <Background velocityRef={velocityRef} />
       </Container>
       <Container position={[stageWidth / 2, stageHeight / 2]}>
+        <Score
+          value={score}
+          position={[-stageWidth / 2 + 20, -stageHeight / 2 + 20]}
+        />
         <EnemyGrid
           enemies={enemies}
           onUpdateEnemies={setEnemies}
