@@ -1,10 +1,10 @@
 import { Container, useTick } from "@pixi/react";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { EnemyGrid } from "../enemy-grid";
-import { MissileGroup } from "../missile-group";
-import { Player } from "../player";
-import { GameEntity, Point } from "../../types";
-import { useCollisionDetection } from "../../hooks/use-collision-detection";
+import { EnemyGrid } from "./enemy-grid";
+import { MissileGroup } from "./missile-group";
+import { Player } from "./player";
+import { GameEntity, Point } from "../types";
+import { useCollisionDetection } from "../hooks/use-collision-detection";
 import {
   STAGE_SIZE,
   ENEMY_ROWS,
@@ -13,14 +13,20 @@ import {
   MISSILE_SIZE,
   ENEMY_SIZE,
   PLAYER_SIZE,
-} from "../../constants";
-import { Background } from "../background";
-import { createEntity } from "../../utils/entity-factory";
-import { isAlive, setAlive } from "../../utils/entity";
-import { ExplosionGroup } from "../explosion-group";
-import { Score } from "../score";
+} from "../constants";
+import { Background } from "./background";
+import { createEntity } from "../utils/entity-factory";
+import { isAlive, setAlive } from "../utils/entity";
+import { ExplosionGroup } from "./explosion-group";
+import { Score } from "./score";
 
-export function PlayScene({ onGameOver }: { onGameOver: () => void }) {
+export function PlayScene({
+  onGameOver,
+  onVictory,
+}: {
+  onGameOver: () => void;
+  onVictory: (score: number) => void;
+}) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
   const checkCollision = useCollisionDetection();
   const [score, setScore] = useState(0);
@@ -52,6 +58,12 @@ export function PlayScene({ onGameOver }: { onGameOver: () => void }) {
   }, [stageHeight]);
 
   useTick(() => {
+    // Check for victory when all enemies are destroyed
+    if (enemies.length === 0) {
+      onVictory(score);
+      return;
+    }
+
     // Check player missiles vs enemies
     for (const missile of playerMissiles) {
       for (const enemy of enemies) {
