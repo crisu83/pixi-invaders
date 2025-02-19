@@ -9,33 +9,13 @@ A Space Invaders clone built with PixiJS and React.
 - TypeScript 5.7
 - Vite 6.1
 
-## Project Structure
-
-```
-src/
-├── components/         # React components
-│ ├── text.tsx          # Reusable text components
-│ ├── player.tsx        # Player ship component
-│ ├── enemy.tsx         # Enemy ship component
-│ └── ...
-├── hooks/              # Custom React hooks
-│ ├── use-text-style.ts
-│ ├── use-sprite-sheet.ts
-│ └── ...
-├── utils/              # Utility functions
-│ ├── entity.ts         # Entity utilities
-│ └── entity-factory.ts # Entity factory
-├── types.ts            # TypeScript type definitions
-└── constants.ts        # Game constants
-```
-
 ## Game Entities
 
-The game uses an entity-component system where:
-- Entities are objects with position and type
-- Components add behavior (like explosions)
-- Factory functions create entities
-- Helper functions manage entity state
+The game uses a lightweight entity-component system implemented with TypeScript types:
+- Entities and components are immutable using TypeScript's Readonly types
+- Components are type-safe and enforce required properties
+- Factory functions create properly typed entities
+- Helper functions ensure type-safe entity state management
 
 ## Controls
 

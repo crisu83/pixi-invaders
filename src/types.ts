@@ -1,24 +1,24 @@
 export type Point = [number, number];
 export type Size = [number, number];
 export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
-export type GameState = "START" | "PLAYING" | "GAME_OVER";
+export type GameState = "START" | "PLAYING" | "VICTORY" | "GAME_OVER";
 export type ComponentType = "EXPLOSIVE";
 export type EntityType = "PLAYER" | "ENEMY" | "MISSILE";
 
-export interface GameComponent {
+export type GameComponent = Readonly<{
   type: ComponentType;
-}
+}>;
 
-export interface ExplosiveComponent extends GameComponent {
-  type: "EXPLOSIVE";
-  alive: boolean;
-  texture?: string;
-  onExplode?: () => void;
-}
+export type ExplosiveComponent = GameComponent &
+  Readonly<{
+    type: "EXPLOSIVE";
+    alive: boolean;
+    texture: string;
+  }>;
 
-export interface GameEntity {
+export type GameEntity = Readonly<{
   id: number;
   type: EntityType;
   position: Point;
-  components?: GameComponent[];
-}
+  components: readonly GameComponent[];
+}>;
