@@ -1,5 +1,6 @@
 import { Sprite, useTick } from "@pixi/react";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef } from "react";
+import { Sprite as PixiSprite } from "pixi.js";
 import {
   PLAYER_FRAMES,
   PLAYER_SIZE,
@@ -11,23 +12,24 @@ import {
   PLAYER_BOOST_MULTIPLIER,
   PLAYER_MARGIN,
 } from "../constants";
-import { Point, PlayerAnimationState } from "../types";
+import { GameEntity, Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import {
+  getSpriteInitialPosition,
+  getSpriteRef,
+  isAlive,
+} from "../utils/components";
 
-export function Player({
-  initialPosition,
-  onMove,
-  onMissileSpawn,
-  alive,
-}: {
-  initialPosition: Point;
-  onMove: (velocity: Point) => void;
-  onMissileSpawn: (position: Point) => void;
-  alive: boolean;
-}) {
-  const [frame, setFrame] = useState(0);
-  const [animationState, setAnimationState] =
-    useState<PlayerAnimationState>("IDLE");
+export const Player = forwardRef<
+  PixiSprite,
+  {
+    entity: GameEntity;
+    onMove: (velocity: Point) => void;
+    onMissileSpawn: (position: Point) => void;
+  }
+>(({ entity, onMove, onMissileSpawn }, ref) => {
+  const animationFrame = useRef(0);
+  const animationState = useRef<PlayerAnimationState>("IDLE");
   const animationTime = useRef(0);
 
   const textures = useSpriteSheet({
@@ -48,12 +50,15 @@ export function Player({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!alive) return;
+      if (!isAlive(entity)) return;
       keysPressed.current.add(e.key);
       if (e.code === "Space") {
         const now = Date.now();
         if (now - lastShotTime.current >= MISSILE_COOLDOWN) {
-          onMissileSpawn(initialPosition);
+          const sprite = getSpriteRef(entity).current;
+          if (sprite) {
+            onMissileSpawn([sprite.x, sprite.y]);
+          }
           lastShotTime.current = now;
         }
       }
@@ -68,23 +73,25 @@ export function Player({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [initialPosition, onMissileSpawn, alive]);
+  }, [onMissileSpawn, entity]);
 
   useTick((delta) => {
     // Don't update position or animate if not alive
-    if (!alive) return;
+    if (!isAlive(entity)) return;
+
+    const sprite = getSpriteRef(entity).current;
+    if (!sprite) return;
 
     const isBoostPressed = keysPressed.current.has("Shift");
     const speed =
       PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-    const newPos: Point = [...initialPosition];
     velocity.current = [0, 0];
 
     let newAnimationState: PlayerAnimationState = "IDLE";
 
     if (keysPressed.current.has("ArrowLeft")) {
-      const nextX = Math.max(leftBound, newPos[0] - speed);
-      newPos[0] = nextX;
+      const nextX = Math.max(leftBound, sprite.x - speed);
+      sprite.x = nextX;
       if (nextX > leftBound) {
         velocity.current[0] =
           -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
@@ -92,8 +99,8 @@ export function Player({
       newAnimationState = "TILT_LEFT";
     }
     if (keysPressed.current.has("ArrowRight")) {
-      const nextX = Math.min(rightBound, newPos[0] + speed);
-      newPos[0] = nextX;
+      const nextX = Math.min(rightBound, sprite.x + speed);
+      sprite.x = nextX;
       if (nextX < rightBound) {
         velocity.current[0] =
           1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
@@ -102,28 +109,33 @@ export function Player({
     }
 
     onMove(velocity.current);
-    setAnimationState(newAnimationState);
+    animationState.current = newAnimationState;
 
     // Update animation frame
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
-      const [firstFrame, lastFrame] = PLAYER_FRAMES[animationState];
-      setFrame((f) => {
-        if (f < firstFrame || f > lastFrame) {
-          return firstFrame;
-        }
-        return f === firstFrame ? lastFrame : firstFrame;
-      });
+      const [firstFrame, lastFrame] = PLAYER_FRAMES[animationState.current];
+      if (
+        animationFrame.current < firstFrame ||
+        animationFrame.current > lastFrame
+      ) {
+        animationFrame.current = firstFrame;
+      } else {
+        animationFrame.current =
+          animationFrame.current === firstFrame ? lastFrame : firstFrame;
+      }
+      sprite.texture = textures[animationFrame.current];
     }
   });
 
-  return alive ? (
+  return isAlive(entity) ? (
     <Sprite
-      texture={textures[frame]}
       anchor={0.5}
-      position={initialPosition}
+      texture={textures[0]}
+      position={getSpriteInitialPosition(entity)}
       scale={SPRITE_SCALE}
+      ref={ref}
     />
   ) : null;
-}
+});

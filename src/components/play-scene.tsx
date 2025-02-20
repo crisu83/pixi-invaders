@@ -1,7 +1,6 @@
 import { Container, useTick } from "@pixi/react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { EnemyGrid } from "./enemy-grid";
-import { MissileGroup } from "./missile-group";
 import { Player } from "./player";
 import { GameEntity, Point } from "../types";
 import { useCollisionDetection } from "../hooks/use-collision-detection";
@@ -16,9 +15,10 @@ import {
 } from "../constants";
 import { Background } from "./background";
 import { createEntity } from "../utils/entity-factory";
-import { isAlive, setAlive } from "../utils/entity";
-import { ExplosionGroup } from "./explosion-group";
+import { getSpriteRef, setAlive } from "../utils/components";
 import { ScoreText } from "./text";
+import { MissileGroup } from "./missile-group";
+import { ExplosionGroup } from "./explosion-group";
 
 export function PlayScene({
   onGameOver,
@@ -28,21 +28,26 @@ export function PlayScene({
   onVictory: (score: number) => void;
 }) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
-  const checkCollision = useCollisionDetection();
-  const [score, setScore] = useState(0);
 
-  // Player state
-  const [player, setPlayer] = useState(
+  const checkCollision = useCollisionDetection();
+
+  const [score, setScore] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [, setRenderTick] = useState(0);
+
+  const playerRef = useRef<GameEntity>(
     createEntity("PLAYER", [0, stageHeight / 3])
   );
-  const [playerMissiles, setPlayerMissiles] = useState<GameEntity[]>([]);
-  const [enemies, setEnemies] = useState<GameEntity[]>([]);
-  const [enemyMissiles, setEnemyMissiles] = useState<GameEntity[]>([]);
-
+  const enemiesRef = useRef<GameEntity[]>([]);
+  const explosionsRef = useRef<GameEntity[]>([]);
   const velocityRef = useRef<Point>([0, 0]);
+  const playerMissilesRef = useRef<GameEntity[]>([]);
+  const enemyMissilesRef = useRef<GameEntity[]>([]);
 
-  // Explosion state
-  const [explosions, setExplosions] = useState<GameEntity[]>([]);
+  const updateRenderTick = useCallback(() => {
+    setRenderTick((prev) => prev + 1);
+  }, []);
 
   // Spawn initial enemies
   useEffect(() => {
@@ -54,72 +59,134 @@ export function PlayScene({
         newEnemies.push(createEntity("ENEMY", [x, y]));
       }
     }
-    setEnemies(newEnemies);
+    enemiesRef.current = newEnemies;
+    setGameStarted(true);
   }, [stageHeight]);
 
+  const handlePlayerMove = useCallback((velocity: Point) => {
+    velocityRef.current = velocity;
+  }, []);
+
+  const handlePlayerMissileSpawn = useCallback(
+    (position: Point) => {
+      const missile = createEntity("MISSILE", position);
+      playerMissilesRef.current = [...playerMissilesRef.current, missile];
+      updateRenderTick();
+    },
+    [updateRenderTick]
+  );
+
+  const handleEnemyMissileSpawn = useCallback(
+    (position: Point) => {
+      const missile = createEntity("MISSILE", position);
+      enemyMissilesRef.current = [...enemyMissilesRef.current, missile];
+      updateRenderTick();
+    },
+    [updateRenderTick]
+  );
+
+  const handlePlayerMissileDestroy = useCallback(
+    (missileId: number) => {
+      playerMissilesRef.current = playerMissilesRef.current.filter(
+        (m) => m.id !== missileId
+      );
+      updateRenderTick();
+    },
+    [updateRenderTick]
+  );
+
+  const handleEnemyMissileDestroy = useCallback(
+    (missileId: number) => {
+      enemyMissilesRef.current = enemyMissilesRef.current.filter(
+        (m) => m.id !== missileId
+      );
+      updateRenderTick();
+    },
+    [updateRenderTick]
+  );
+
+  const handleExplosionComplete = useCallback(
+    (explosionId: number) => {
+      explosionsRef.current = explosionsRef.current.filter(
+        (e) => e.id !== explosionId
+      );
+      updateRenderTick();
+    },
+    [updateRenderTick]
+  );
+
   const handlePlayerDeath = useCallback(() => {
-    setPlayer((prev) => setAlive(prev, false));
-    setExplosions((prev) => [...prev, player]);
-    setTimeout(() => onGameOver(score), 1000);
-  }, [player, onGameOver, score]);
+    if (gameOver) return;
+    setGameOver(true);
+
+    const sprite = getSpriteRef(playerRef.current).current;
+    if (sprite) {
+      playerRef.current = setAlive(playerRef.current, false);
+      const explosion = createEntity("EXPLOSION", [sprite.x, sprite.y]);
+      explosionsRef.current = [...explosionsRef.current, explosion];
+      updateRenderTick();
+      setTimeout(() => onGameOver(score), 1000);
+    }
+  }, [onGameOver, score, gameOver, updateRenderTick]);
 
   useTick(() => {
+    if (!gameStarted) return;
+
     // Check for victory when all enemies are destroyed
-    if (enemies.length === 0) {
+    if (enemiesRef.current.length === 0) {
       onVictory(score);
       return;
     }
 
     // Check if enemies have reached the player's height
-    if (enemies.some((enemy) => enemy.position[1] >= player.position[1])) {
+    const sprite = getSpriteRef(playerRef.current).current;
+    if (!sprite) return;
+
+    if (
+      enemiesRef.current.some((enemy) => {
+        const enemySprite = getSpriteRef(enemy).current;
+        return enemySprite && enemySprite.y >= sprite.y;
+      })
+    ) {
       handlePlayerDeath();
       return;
     }
 
     // Check player missiles vs enemies
-    for (const missile of playerMissiles) {
-      for (const enemy of enemies) {
+    for (const missile of playerMissilesRef.current) {
+      for (const enemy of enemiesRef.current) {
         if (checkCollision(missile, enemy, MISSILE_SIZE, ENEMY_SIZE)) {
-          setPlayerMissiles((prev) => prev.filter((m) => m.id !== missile.id));
-          setExplosions((prev) => [...prev, enemy]);
-          setEnemies((prev) => prev.filter((e) => e.id !== enemy.id));
-          setScore((prev) => prev + 100);
+          handlePlayerMissileDestroy(missile.id);
+          const sprite = getSpriteRef(enemy).current;
+          if (sprite) {
+            enemiesRef.current = enemiesRef.current.filter(
+              (e) => e.id !== enemy.id
+            );
+            const explosion = createEntity(
+              "EXPLOSION",
+              [sprite.x, sprite.y],
+              "ENEMY"
+            );
+            explosionsRef.current = [...explosionsRef.current, explosion];
+            updateRenderTick();
+            setScore((prev) => prev + 100);
+          }
           break;
         }
       }
     }
 
     // Check enemy missiles vs player
-    for (const missile of enemyMissiles) {
-      if (checkCollision(missile, player, MISSILE_SIZE, PLAYER_SIZE)) {
-        setEnemyMissiles((prev) => prev.filter((m) => m.id !== missile.id));
+    for (const missile of enemyMissilesRef.current) {
+      if (
+        checkCollision(missile, playerRef.current, MISSILE_SIZE, PLAYER_SIZE)
+      ) {
+        handleEnemyMissileDestroy(missile.id);
         handlePlayerDeath();
         break;
       }
     }
   });
-
-  const handlePlayerMove = useCallback((velocity: Point) => {
-    velocityRef.current = velocity;
-    setPlayer((prev) => {
-      const [x, y] = prev.position;
-      return { ...prev, position: [x + velocity[0], y] };
-    });
-  }, []);
-
-  const handlePlayerMissileSpawn = useCallback(
-    (position: Point) => {
-      setPlayerMissiles([...playerMissiles, createEntity("MISSILE", position)]);
-    },
-    [playerMissiles]
-  );
-
-  const handleEnemyMissileSpawn = useCallback(
-    (position: Point) => {
-      setEnemyMissiles([...enemyMissiles, createEntity("MISSILE", position)]);
-    },
-    [enemyMissiles]
-  );
 
   return (
     <>
@@ -131,30 +198,26 @@ export function PlayScene({
           value={score}
           position={[-stageWidth / 2 + 20, -stageHeight / 2 + 20]}
         />
+        <Player
+          entity={playerRef.current}
+          onMove={handlePlayerMove}
+          onMissileSpawn={handlePlayerMissileSpawn}
+          ref={getSpriteRef(playerRef.current)}
+        />
         <EnemyGrid
-          enemies={enemies}
-          onUpdateEnemies={setEnemies}
+          enemies={enemiesRef.current}
           onMissileSpawn={handleEnemyMissileSpawn}
         />
         <MissileGroup
-          missiles={playerMissiles}
-          setMissiles={setPlayerMissiles}
-          direction={[0, -1]}
-          texture="missile_01.png"
+          playerMissiles={playerMissilesRef.current}
+          enemyMissiles={enemyMissilesRef.current}
+          onPlayerMissileDestroy={handlePlayerMissileDestroy}
+          onEnemyMissileDestroy={handleEnemyMissileDestroy}
         />
-        <MissileGroup
-          missiles={enemyMissiles}
-          setMissiles={setEnemyMissiles}
-          direction={[0, 1]}
-          texture="missile_02.png"
+        <ExplosionGroup
+          explosions={explosionsRef.current}
+          onExplosionComplete={handleExplosionComplete}
         />
-        <Player
-          initialPosition={player.position}
-          onMove={handlePlayerMove}
-          onMissileSpawn={handlePlayerMissileSpawn}
-          alive={isAlive(player)}
-        />
-        <ExplosionGroup explosions={explosions} setExplosions={setExplosions} />
       </Container>
     </>
   );

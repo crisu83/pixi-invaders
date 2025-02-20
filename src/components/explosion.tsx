@@ -1,53 +1,56 @@
 import { Sprite, useTick } from "@pixi/react";
-import { useRef, useState } from "react";
+import { forwardRef, useRef } from "react";
+import { Sprite as PixiSprite } from "pixi.js";
 import { ANIMATION_SPEED, EXPLOSION_SIZE, SPRITE_SCALE } from "../constants";
-import { Point } from "../types";
+import { GameEntity } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import {
+  getSpriteInitialPosition,
+  getSpriteRef,
+  getSpriteTexture,
+} from "../utils/components";
 
-export function Explosion({
-  position,
-  texture,
-  onComplete,
-}: {
-  position: Point;
-  texture: string;
-  onComplete: () => void;
-}) {
+export const Explosion = forwardRef<
+  PixiSprite,
+  {
+    entity: GameEntity;
+    onComplete: () => void;
+  }
+>(({ entity, onComplete }, ref) => {
   const frameCount = 5;
-  const [frame, setFrame] = useState(0);
+
+  const animationFrame = useRef(0);
   const animationTime = useRef(0);
-  const [done, setDone] = useState(false);
 
   const textures = useSpriteSheet({
-    path: `/sprites/${texture}`,
+    path: `/sprites/${getSpriteTexture(entity)}`,
     frameCount,
     size: EXPLOSION_SIZE,
   });
 
   useTick((delta) => {
-    if (done) return;
+    const sprite = getSpriteRef(entity).current;
+    if (!sprite) return;
 
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
-      setFrame((f) => {
-        const next = f + 1;
-        if (next >= frameCount) {
-          setDone(true);
-          onComplete();
-          return f;
-        }
-        return next;
-      });
+      animationFrame.current++;
+      if (animationFrame.current >= frameCount) {
+        onComplete();
+      } else {
+        sprite.texture = textures[animationFrame.current];
+      }
     }
   });
 
-  return !done ? (
+  return animationFrame.current < frameCount ? (
     <Sprite
       anchor={0.5}
-      position={position}
-      texture={textures[frame]}
+      texture={textures[0]}
+      position={getSpriteInitialPosition(entity)}
       scale={SPRITE_SCALE}
+      ref={ref}
     />
   ) : null;
-}
+});

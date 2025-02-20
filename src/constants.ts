@@ -29,4 +29,14 @@ export const ENEMY_SPACING: Size = [60, 50]; // More horizontal and vertical spa
 export const ENEMY_MARGIN = 100; // Keep enemies this far from stage edges
 
 export const EXPLOSION_SIZE: Size = [20, 20];
-export const PLAYER_EXPLOSION_SIZE: Size = [32, 32];
+
+export const VARIANT_TEXTURES = {
+  MISSILE: {
+    PLAYER: "missile_01.png",
+    ENEMY: "missile_02.png",
+  },
+  EXPLOSION: {
+    PLAYER: "explosion_02.png",
+    ENEMY: "explosion_04.png",
+  },
+} as const;

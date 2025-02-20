@@ -1,38 +1,56 @@
-import { GameEntity, Point } from "../types";
+import { useTick } from "@pixi/react";
+import { GameEntity } from "../types";
 import { Missile } from "./missile";
-import { Container } from "@pixi/react";
+import { MISSILE_SPEED } from "../constants";
+import { getSpriteRef } from "../utils/components";
 
 export function MissileGroup({
-  missiles,
-  setMissiles,
-  direction,
-  texture,
+  playerMissiles,
+  enemyMissiles,
+  onPlayerMissileDestroy,
+  onEnemyMissileDestroy,
 }: {
-  missiles: GameEntity[];
-  setMissiles: React.Dispatch<React.SetStateAction<GameEntity[]>>;
-  direction: Point;
-  texture: string;
+  playerMissiles: GameEntity[];
+  enemyMissiles: GameEntity[];
+  onPlayerMissileDestroy: (id: number) => void;
+  onEnemyMissileDestroy: (id: number) => void;
 }) {
+  useTick((delta) => {
+    // Move player missiles
+    for (const missile of playerMissiles) {
+      const sprite = getSpriteRef(missile).current;
+      if (sprite) {
+        sprite.y -= MISSILE_SPEED * delta;
+      }
+    }
+
+    // Move enemy missiles
+    for (const missile of enemyMissiles) {
+      const sprite = getSpriteRef(missile).current;
+      if (sprite) {
+        sprite.y += MISSILE_SPEED * delta;
+      }
+    }
+  });
+
   return (
-    <Container>
-      {missiles.map((missile) => (
+    <>
+      {playerMissiles.map((missile) => (
         <Missile
           key={missile.id}
-          initialPosition={missile.position}
-          direction={direction}
-          texture={texture}
-          onMove={(newPosition) => {
-            setMissiles((prev) =>
-              prev.map((m) =>
-                m.id === missile.id ? { ...m, position: newPosition } : m
-              )
-            );
-          }}
-          onDestroy={() => {
-            setMissiles((prev) => prev.filter((m) => m.id !== missile.id));
-          }}
+          entity={missile}
+          onDestroy={() => onPlayerMissileDestroy(missile.id)}
+          ref={getSpriteRef(missile)}
         />
       ))}
-    </Container>
+      {enemyMissiles.map((missile) => (
+        <Missile
+          key={missile.id}
+          entity={missile}
+          onDestroy={() => onEnemyMissileDestroy(missile.id)}
+          ref={getSpriteRef(missile)}
+        />
+      ))}
+    </>
   );
 }

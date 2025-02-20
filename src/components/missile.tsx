@@ -1,73 +1,68 @@
 import { Sprite, useTick } from "@pixi/react";
-import { useRef, useState } from "react";
+import { forwardRef, useRef } from "react";
+import { Sprite as PixiSprite } from "pixi.js";
 import {
-  MISSILE_SPEED,
   ANIMATION_SPEED,
   MISSILE_SIZE,
-  STAGE_SIZE,
   SPRITE_SCALE,
+  STAGE_SIZE,
 } from "../constants";
-import { Point } from "../types";
+import { GameEntity } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import {
+  getSpriteInitialPosition,
+  getSpriteRef,
+  getSpriteTexture,
+} from "../utils/components";
 
-export function Missile({
-  initialPosition,
-  onDestroy,
-  direction,
-  texture,
-  onMove = () => {},
-}: {
-  initialPosition: Point;
-  onDestroy: () => void;
-  direction: Point;
-  texture: string;
-  onMove?: (position: Point) => void;
-}) {
+export const Missile = forwardRef<
+  PixiSprite,
+  {
+    entity: GameEntity;
+    onDestroy: () => void;
+  }
+>(({ entity, onDestroy }, ref) => {
   const [, stageHeight] = STAGE_SIZE;
   const [, missileHeight] = MISSILE_SIZE;
 
-  const [position, setPosition] = useState<Point>(initialPosition);
-  const [frame, setFrame] = useState(0);
+  const animationFrame = useRef(0);
   const animationTime = useRef(0);
 
   const textures = useSpriteSheet({
-    path: `/sprites/${texture}`,
+    path: `/sprites/${getSpriteTexture(entity)}`,
     frameCount: 2,
     size: MISSILE_SIZE,
   });
 
   useTick((delta) => {
-    // Move missile
-    const newPosition: Point = [
-      position[0] + MISSILE_SPEED * delta * direction[0],
-      position[1] + MISSILE_SPEED * delta * direction[1],
-    ];
-    setPosition(newPosition);
-    onMove(newPosition);
+    const sprite = getSpriteRef(entity).current;
+    if (!sprite) return;
 
     // Check if off screen and destroy
-
     if (
-      newPosition[1] < -stageHeight / 2 - missileHeight ||
-      newPosition[1] > stageHeight / 2 + missileHeight
+      sprite.y < -stageHeight / 2 - missileHeight ||
+      sprite.y > stageHeight / 2 + missileHeight
     ) {
       onDestroy();
+      return;
     }
 
     // Animate
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
-      setFrame((f) => (f + 1) % 2);
+      animationFrame.current = (animationFrame.current + 1) % 2;
+      sprite.texture = textures[animationFrame.current];
     }
   });
 
   return (
     <Sprite
       anchor={0.5}
-      position={position}
-      texture={textures[frame]}
+      texture={textures[0]}
+      position={getSpriteInitialPosition(entity)}
       scale={SPRITE_SCALE}
+      ref={ref}
     />
   );
-}
+});

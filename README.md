@@ -11,11 +11,11 @@ A Space Invaders clone built with PixiJS and React.
 
 ## Game Entities
 
-The game uses a lightweight entity-component system implemented with TypeScript types:
-- Entities and components are immutable using TypeScript's Readonly types
-- Components are type-safe and enforce required properties
-- Factory functions create properly typed entities
-- Helper functions ensure type-safe entity state management
+The game uses a ref-based entity system for optimal performance:
+- Entities are stored in refs to avoid unnecessary re-renders
+- Each entity has a ref to its PixiJS sprite for direct manipulation
+- Entity groups (missiles, enemies, etc.) are managed in dedicated components
+- Component-based architecture for reusable game logic
 
 ## Controls
 

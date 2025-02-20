@@ -1,13 +1,26 @@
+import { MutableRefObject } from "react";
+import { Sprite } from "pixi.js";
+
 export type Point = [number, number];
 export type Size = [number, number];
 export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
 export type GameState = "START" | "PLAYING" | "VICTORY" | "GAME_OVER";
-export type ComponentType = "EXPLOSIVE";
-export type EntityType = "PLAYER" | "ENEMY" | "MISSILE";
+export type ComponentType = "SPRITE" | "EXPLOSIVE";
+export type EntityType = "PLAYER" | "ENEMY" | "MISSILE" | "EXPLOSION";
+export type EntityVariant = "PLAYER" | "ENEMY";
 
 export type GameComponent = Readonly<{
   type: ComponentType;
 }>;
+
+export type SpriteComponent = GameComponent &
+  Readonly<{
+    type: "SPRITE";
+    initialPosition: Point;
+    size: Size;
+    texture: string;
+    ref: MutableRefObject<Sprite | null>;
+  }>;
 
 export type ExplosiveComponent = GameComponent &
   Readonly<{
@@ -19,6 +32,5 @@ export type ExplosiveComponent = GameComponent &
 export type GameEntity = Readonly<{
   id: number;
   type: EntityType;
-  position: Point;
   components: readonly GameComponent[];
 }>;
