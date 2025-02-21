@@ -7,7 +7,6 @@ import {
   Point,
   Size,
   MovementComponent,
-  EntityVariant,
 } from "../types";
 import { MutableRefObject } from "react";
 

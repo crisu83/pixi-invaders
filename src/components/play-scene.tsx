@@ -12,14 +12,16 @@ import {
   MISSILE_SIZE,
   PLAYER_SIZE,
   STAGE_SIZE,
+  MAX_TIME_BONUS,
+  TIME_PENALTY_PER_SECOND,
 } from "../constants";
-import { Background } from "./background";
 import { createEntity } from "../utils/entity-factory";
 import { getSpriteRef, setAlive } from "../utils/components";
-import { ScoreText } from "./text";
-import { MissileGroup } from "./missile-group";
+import { Background } from "./background";
 import { ExplosionGroup } from "./explosion-group";
+import { MissileGroup } from "./missile-group";
 import { PerformanceStats } from "./performance-stats";
+import { ScoreText } from "./text";
 
 export function PlayScene({
   onGameOver,
@@ -37,21 +39,22 @@ export function PlayScene({
   const [gameOver, setGameOver] = useState(false);
   const [renderTick, setRenderTick] = useState(0);
   const [showStats, setShowStats] = useState(false);
+  const startTime = useRef<number>(0);
 
   const playerRef = useRef<GameEntity>(
     createEntity("PLAYER", [0, stageHeight / 3])
   );
   const enemiesRef = useRef<GameEntity[]>([]);
-  const explosionsRef = useRef<GameEntity[]>([]);
-  const velocityRef = useRef<Point>([0, 0]);
   const playerMissilesRef = useRef<GameEntity[]>([]);
   const enemyMissilesRef = useRef<GameEntity[]>([]);
+  const explosionsRef = useRef<GameEntity[]>([]);
+  const velocityRef = useRef<Point>([0, 0]);
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev) => prev + 1);
   }, []);
 
-  // Spawn initial enemies
+  // Spawn initial enemies and start timer
   useEffect(() => {
     const newEnemies: GameEntity[] = [];
     for (let row = 0; row < ENEMY_ROWS; row++) {
@@ -62,6 +65,7 @@ export function PlayScene({
       }
     }
     enemiesRef.current = newEnemies;
+    startTime.current = performance.now();
     setGameStarted(true);
   }, [stageHeight]);
 
@@ -80,7 +84,7 @@ export function PlayScene({
 
   const handleEnemyMissileSpawn = useCallback(
     (position: Point) => {
-      const missile = createEntity("MISSILE", position);
+      const missile = createEntity("MISSILE", position, "ENEMY");
       enemyMissilesRef.current = [...enemyMissilesRef.current, missile];
       updateRenderTick();
     },
@@ -149,7 +153,14 @@ export function PlayScene({
 
     // Check for victory when all enemies are destroyed
     if (enemiesRef.current.length === 0) {
-      onVictory(score);
+      // Calculate time bonus
+      const gameTime = (performance.now() - startTime.current) / 1000;
+      const timeBonus = Math.max(
+        0,
+        Math.round(MAX_TIME_BONUS - gameTime * TIME_PENALTY_PER_SECOND)
+      );
+      const finalScore = score + timeBonus;
+      onVictory(finalScore);
       return;
     }
 
