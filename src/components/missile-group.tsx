@@ -1,7 +1,5 @@
-import { useTick } from "@pixi/react";
 import { GameEntity } from "../types";
 import { Missile } from "./missile";
-import { MISSILE_SPEED } from "../constants";
 import { getSpriteRef } from "../utils/components";
 
 export function MissileGroup({
@@ -15,24 +13,6 @@ export function MissileGroup({
   onPlayerMissileDestroy: (id: number) => void;
   onEnemyMissileDestroy: (id: number) => void;
 }) {
-  useTick((delta) => {
-    // Move player missiles
-    for (const missile of playerMissiles) {
-      const sprite = getSpriteRef(missile).current;
-      if (sprite) {
-        sprite.y -= MISSILE_SPEED * delta;
-      }
-    }
-
-    // Move enemy missiles
-    for (const missile of enemyMissiles) {
-      const sprite = getSpriteRef(missile).current;
-      if (sprite) {
-        sprite.y += MISSILE_SPEED * delta;
-      }
-    }
-  });
-
   return (
     <>
       {playerMissiles.map((missile) => (
@@ -41,6 +21,7 @@ export function MissileGroup({
           entity={missile}
           onDestroy={() => onPlayerMissileDestroy(missile.id)}
           ref={getSpriteRef(missile)}
+          direction={-1}
         />
       ))}
       {enemyMissiles.map((missile) => (
@@ -49,6 +30,7 @@ export function MissileGroup({
           entity={missile}
           onDestroy={() => onEnemyMissileDestroy(missile.id)}
           ref={getSpriteRef(missile)}
+          direction={1}
         />
       ))}
     </>

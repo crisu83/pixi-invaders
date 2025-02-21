@@ -22,7 +22,7 @@ export const Enemy = forwardRef<PixiSprite, { entity: GameEntity }>(
     });
 
     useTick((delta) => {
-      // Don't animate if not alive
+      // Don't animate or move if not alive
       if (!isAlive(entity)) return;
 
       const sprite = getSpriteRef(entity).current;

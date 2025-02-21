@@ -4,6 +4,7 @@ import { Sprite as PixiSprite } from "pixi.js";
 import {
   ANIMATION_SPEED,
   MISSILE_SIZE,
+  MISSILE_SPEED,
   SPRITE_SCALE,
   STAGE_SIZE,
 } from "../constants";
@@ -13,6 +14,7 @@ import {
   getSpriteInitialPosition,
   getSpriteRef,
   getSpriteTexture,
+  setVelocity,
 } from "../utils/components";
 
 export const Missile = forwardRef<
@@ -20,8 +22,9 @@ export const Missile = forwardRef<
   {
     entity: GameEntity;
     onDestroy: () => void;
+    direction: number;
   }
->(({ entity, onDestroy }, ref) => {
+>(({ entity, onDestroy, direction }, ref) => {
   const [, stageHeight] = STAGE_SIZE;
   const [, missileHeight] = MISSILE_SIZE;
 
@@ -37,6 +40,11 @@ export const Missile = forwardRef<
   useTick((delta) => {
     const sprite = getSpriteRef(entity).current;
     if (!sprite) return;
+
+    // Move based on direction
+    const speed = direction * MISSILE_SPEED;
+    setVelocity(entity, [0, speed * delta]);
+    sprite.y += speed * delta;
 
     // Check if off screen and destroy
     if (

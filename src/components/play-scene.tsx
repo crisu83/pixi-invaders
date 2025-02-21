@@ -5,13 +5,13 @@ import { Player } from "./player";
 import { GameEntity, Point } from "../types";
 import { useCollisionDetection } from "../hooks/use-collision-detection";
 import {
-  STAGE_SIZE,
   ENEMY_ROWS,
-  ENEMIES_PER_ROW,
-  ENEMY_SPACING,
-  MISSILE_SIZE,
   ENEMY_SIZE,
+  ENEMY_SPACING,
+  ENEMIES_PER_ROW,
+  MISSILE_SIZE,
   PLAYER_SIZE,
+  STAGE_SIZE,
 } from "../constants";
 import { Background } from "./background";
 import { createEntity } from "../utils/entity-factory";

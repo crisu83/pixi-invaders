@@ -1,11 +1,10 @@
 import { Container, useTick } from "@pixi/react";
 import { useRef } from "react";
-import { Sprite as PixiSprite } from "pixi.js";
 import {
-  ENEMY_SIZE,
+  ENEMY_SPACING,
   ENEMY_SPEED,
-  ENEMY_MARGIN,
   MISSILE_COOLDOWN,
+  STAGE_MARGIN,
 } from "../constants";
 import { Enemy } from "./enemy";
 import { STAGE_SIZE } from "../constants";
@@ -23,6 +22,7 @@ export function EnemyGrid({
 
   const lastFireTime = useRef(0);
   const enemyDirection = useRef(1);
+  const enemyPositions = useRef<Map<number, Point>>(new Map());
 
   useTick((delta) => {
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
@@ -30,10 +30,10 @@ export function EnemyGrid({
 
     // Only check boundary collisions for alive enemies
     const wouldHitBoundary = enemies.some((enemy) => {
-      const sprite = getSpriteRef(enemy).current;
-      if (!isAlive(enemy) || !sprite) return false;
-      const newX = sprite.x + moveAmount;
-      return Math.abs(newX) > (stageWidth - ENEMY_MARGIN * 2) / 2;
+      const position = enemyPositions.current.get(enemy.id);
+      if (!isAlive(enemy) || !position) return false;
+      const newX = position[0] + moveAmount;
+      return Math.abs(newX) > (stageWidth - STAGE_MARGIN * 2) / 2;
     });
 
     if (wouldHitBoundary) {
@@ -41,38 +41,38 @@ export function EnemyGrid({
       needsToMoveDown = true;
     }
 
-    // Update enemy positions directly through sprite refs
+    // Update enemy positions
     enemies.forEach((enemy) => {
-      // Don't move dead enemies or those without refs
+      if (!isAlive(enemy)) return;
       const sprite = getSpriteRef(enemy).current;
-      if (!isAlive(enemy) || !sprite) return;
+      if (!sprite) return;
 
-      if (!wouldHitBoundary) {
-        sprite.x += moveAmount;
-      }
-      if (needsToMoveDown) {
-        sprite.y += ENEMY_SIZE[1];
-      }
+      const newX =
+        sprite.x +
+        (needsToMoveDown ? 0 : ENEMY_SPEED * delta * enemyDirection.current);
+      const newY = sprite.y + (needsToMoveDown ? ENEMY_SPACING[1] : 0);
+
+      sprite.x = newX;
+      sprite.y = newY;
+
+      enemyPositions.current.set(enemy.id, [newX, newY]);
     });
 
     // Random firing logic
     const currentTime = Date.now();
     if (currentTime - lastFireTime.current > MISSILE_COOLDOWN) {
       if (Math.random() < 0.02 && enemies.length > 0) {
-        const columns = new Map<
-          number,
-          { sprite: PixiSprite; lowestY: number }
-        >();
+        const columns = new Map<number, { position: Point; lowestY: number }>();
 
         // Only consider alive enemies
         for (const enemy of enemies.filter(isAlive)) {
-          const sprite = getSpriteRef(enemy).current;
-          if (!sprite) continue;
-          const x = Math.round(sprite.x);
-          const y = sprite.y;
+          const position = enemyPositions.current.get(enemy.id);
+          if (!position) continue;
+          const x = Math.round(position[0]);
+          const y = position[1];
           const current = columns.get(x);
           if (!current || y > current.lowestY) {
-            columns.set(x, { sprite, lowestY: y });
+            columns.set(x, { position, lowestY: y });
           }
         }
 
@@ -80,7 +80,7 @@ export function EnemyGrid({
         if (frontEnemies.length > 0) {
           const shooter =
             frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
-          onMissileSpawn([shooter.sprite.x, shooter.sprite.y]);
+          onMissileSpawn(shooter.position);
           lastFireTime.current = currentTime;
         }
       }

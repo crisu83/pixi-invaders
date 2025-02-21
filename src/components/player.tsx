@@ -10,7 +10,7 @@ import {
   MISSILE_COOLDOWN,
   STAGE_SIZE,
   PLAYER_BOOST_MULTIPLIER,
-  PLAYER_MARGIN,
+  STAGE_MARGIN,
 } from "../constants";
 import { GameEntity, Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
@@ -18,6 +18,7 @@ import {
   getSpriteInitialPosition,
   getSpriteRef,
   isAlive,
+  setVelocity,
 } from "../utils/components";
 
 export const Player = forwardRef<
@@ -39,14 +40,13 @@ export const Player = forwardRef<
   });
 
   const keysPressed = useRef<Set<string>>(new Set());
-  const velocity = useRef<Point>([0, 0]);
   const lastShotTime = useRef(0);
 
   const [stageWidth] = STAGE_SIZE;
 
   // Calculate boundaries once
-  const leftBound = -(stageWidth - PLAYER_MARGIN * 2) / 2;
-  const rightBound = (stageWidth - PLAYER_MARGIN * 2) / 2;
+  const leftBound = -(stageWidth - STAGE_MARGIN * 2) / 2;
+  const rightBound = (stageWidth - STAGE_MARGIN * 2) / 2;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -85,30 +85,28 @@ export const Player = forwardRef<
     const isBoostPressed = keysPressed.current.has("Shift");
     const speed =
       PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-    velocity.current = [0, 0];
 
     let newAnimationState: PlayerAnimationState = "IDLE";
+    let newVelocity: Point = [0, 0];
 
     if (keysPressed.current.has("ArrowLeft")) {
       const nextX = Math.max(leftBound, sprite.x - speed);
       sprite.x = nextX;
       if (nextX > leftBound) {
-        velocity.current[0] =
-          -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+        newVelocity = [-1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1), 0];
       }
       newAnimationState = "TILT_LEFT";
-    }
-    if (keysPressed.current.has("ArrowRight")) {
+    } else if (keysPressed.current.has("ArrowRight")) {
       const nextX = Math.min(rightBound, sprite.x + speed);
       sprite.x = nextX;
       if (nextX < rightBound) {
-        velocity.current[0] =
-          1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
+        newVelocity = [1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1), 0];
       }
       newAnimationState = "TILT_RIGHT";
     }
 
-    onMove(velocity.current);
+    setVelocity(entity, newVelocity);
+    onMove(newVelocity);
     animationState.current = newAnimationState;
 
     // Update animation frame

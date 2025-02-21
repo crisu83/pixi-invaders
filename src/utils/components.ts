@@ -6,6 +6,8 @@ import {
   SpriteComponent,
   Point,
   Size,
+  MovementComponent,
+  EntityVariant,
 } from "../types";
 import { MutableRefObject } from "react";
 
@@ -54,6 +56,40 @@ export const getSpriteRef = (
   return spriteRef;
 };
 
+export const createMovementComponent = (
+  velocity: Point = [0, 0]
+): MovementComponent => ({
+  type: "MOVEMENT",
+  velocity,
+});
+
+const getMovementComponent = (
+  entity: GameEntity
+): MovementComponent | undefined => {
+  return getComponent<MovementComponent>(entity, "MOVEMENT");
+};
+
+const isMovement = (
+  component: GameComponent
+): component is MovementComponent => {
+  return component.type === "MOVEMENT";
+};
+
+export const getVelocity = (entity: GameEntity): Point => {
+  return getMovementComponent(entity)?.velocity ?? [0, 0];
+};
+
+export const setVelocity = (
+  entity: GameEntity,
+  velocity: Point
+): GameEntity => {
+  return {
+    ...entity,
+    components: entity.components?.map((c) =>
+      isMovement(c) ? { ...c, velocity } : c
+    ),
+  };
+};
 export const createExplosiveComponent = (
   texture: string
 ): ExplosiveComponent => ({

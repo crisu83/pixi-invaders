@@ -6,7 +6,11 @@ import {
   PLAYER_SIZE,
   VARIANT_TEXTURES,
 } from "../constants";
-import { createExplosiveComponent, createSpriteComponent } from "./components";
+import {
+  createExplosiveComponent,
+  createMovementComponent,
+  createSpriteComponent,
+} from "./components";
 
 let nextEntityId = 1;
 
@@ -22,20 +26,21 @@ export const createEntity = (
   };
 
   switch (type) {
+    case "PLAYER":
+      return {
+        ...base,
+        components: [
+          createSpriteComponent(position, PLAYER_SIZE, "ship_01.png"),
+          createMovementComponent(),
+          createExplosiveComponent("explosion_02.png"),
+        ],
+      };
     case "ENEMY":
       return {
         ...base,
         components: [
           createSpriteComponent(position, ENEMY_SIZE, "ship_02.png"),
           createExplosiveComponent("explosion_04.png"),
-        ],
-      };
-    case "PLAYER":
-      return {
-        ...base,
-        components: [
-          createSpriteComponent(position, PLAYER_SIZE, "ship_01.png"),
-          createExplosiveComponent("explosion_02.png"),
         ],
       };
     case "MISSILE":
@@ -47,6 +52,7 @@ export const createEntity = (
             MISSILE_SIZE,
             VARIANT_TEXTURES.MISSILE[variant]
           ),
+          createMovementComponent(),
         ],
       };
     case "EXPLOSION":
