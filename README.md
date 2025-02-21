@@ -22,6 +22,7 @@ The game uses a ref-based entity system for optimal performance:
 - Left/Right Arrow: Move ship
 - Space: Fire missile
 - Shift: Boost speed
+- Backtick (`): Toggle performance stats
 
 ## Development
 

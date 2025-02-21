@@ -19,6 +19,7 @@ import { getSpriteRef, setAlive } from "../utils/components";
 import { ScoreText } from "./text";
 import { MissileGroup } from "./missile-group";
 import { ExplosionGroup } from "./explosion-group";
+import { PerformanceStats } from "./performance-stats";
 
 export function PlayScene({
   onGameOver,
@@ -34,7 +35,8 @@ export function PlayScene({
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [, setRenderTick] = useState(0);
+  const [renderTick, setRenderTick] = useState(0);
+  const [showStats, setShowStats] = useState(false);
 
   const playerRef = useRef<GameEntity>(
     createEntity("PLAYER", [0, stageHeight / 3])
@@ -129,6 +131,19 @@ export function PlayScene({
     }
   }, [onGameOver, score, gameOver, updateRenderTick]);
 
+  // Handle stats toggle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Backquote") {
+        setShowStats((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Update game logic
   useTick(() => {
     if (!gameStarted) return;
 
@@ -196,7 +211,12 @@ export function PlayScene({
       <Container position={[stageWidth / 2, stageHeight / 2]}>
         <ScoreText
           value={score}
-          position={[-stageWidth / 2 + 20, -stageHeight / 2 + 20]}
+          position={[-stageWidth / 2 + 20, -stageHeight / 2 + 15]}
+        />
+        <PerformanceStats
+          renderTick={renderTick}
+          position={[stageWidth / 2 - 20, -stageHeight / 2 + 15]}
+          visible={showStats}
         />
         <Player
           entity={playerRef.current}
