@@ -12,7 +12,7 @@ A Space Invaders clone built with PixiJS and React.
 
 ## Game Architecture
 
-The game uses a modern, component-based architecture:
+The game uses a modern, functional architecture:
 
 ### Entity System
 - Entities are stored in refs to avoid unnecessary re-renders
@@ -26,6 +26,12 @@ The game uses a modern, component-based architecture:
 - Handles all game entities (player, enemies, missiles)
 - Provides actions for entity lifecycle (spawn, destroy)
 - Ensures predictable state updates and easier debugging
+
+### Systems
+The game logic is organized into pure functional systems:
+- Each system is a collection of pure functions that operate on game state
+- Systems are created with factory functions that receive game state
+- Hooks provide React components access to systems
 
 ## Controls
 
