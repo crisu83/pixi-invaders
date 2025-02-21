@@ -1,25 +1,22 @@
 import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
-import { EnemyGrid } from "./enemy-grid";
-import { Player } from "./player";
-import { Point } from "../types";
-import { useCollisionDetection } from "../hooks/use-collision-detection";
 import {
-  ENEMY_SIZE,
-  MISSILE_SIZE,
-  PLAYER_SIZE,
   STAGE_SIZE,
   MAX_TIME_BONUS,
   TIME_PENALTY_PER_SECOND,
 } from "../constants";
+import { Point } from "../types";
 import { useGameStore } from "../stores/game-store";
-import { Background } from "./background";
-import { createEntity } from "../utils/entity-factory";
+import { useCollisionSystem } from "../systems/collision-system";
 import { getSpriteRef, setAlive } from "../utils/components";
-import { ScoreText } from "./text";
-import { MissileGroup } from "./missile-group";
+import { createEntity } from "../utils/entity-factory";
+import { Background } from "./background";
+import { EnemyGrid } from "./enemy-grid";
 import { ExplosionGroup } from "./explosion-group";
+import { MissileGroup } from "./missile-group";
+import { Player } from "./player";
 import { PerformanceStats } from "./performance-stats";
+import { ScoreText } from "./text";
 
 export function PlayScene({
   onGameOver,
@@ -29,7 +26,6 @@ export function PlayScene({
   onVictory: (score: number) => void;
 }) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
-  const checkCollision = useCollisionDetection();
 
   // Game state from Zustand
   const {
@@ -43,7 +39,6 @@ export function PlayScene({
     enemyMissiles,
     explosions,
     velocity,
-    setScore,
     setGameOver,
     updatePlayer,
     addPlayerMissile,
@@ -55,7 +50,14 @@ export function PlayScene({
     removeEnemy,
     setVelocity,
     initializeGame,
+    addScore,
   } = useGameStore();
+
+  const {
+    checkMissileEnemyCollisions,
+    checkMissilePlayerCollisions,
+    checkEnemyPlayerCollisions,
+  } = useCollisionSystem();
 
   const [renderTick, setRenderTick] = useState<number>(0);
   const [showStats, setShowStats] = useState<boolean>(false);
@@ -170,48 +172,31 @@ export function PlayScene({
       return;
     }
 
-    // Check if enemies have reached the player's height
-    const sprite = getSpriteRef(player).current;
-    if (!sprite) return;
-
-    if (
-      enemies.some((enemy) => {
-        const enemySprite = getSpriteRef(enemy).current;
-        return enemySprite && enemySprite.y >= sprite.y;
-      })
-    ) {
+    // Check collisions
+    const enemyCollision = checkEnemyPlayerCollisions();
+    const missileCollision = checkMissilePlayerCollisions();
+    if (enemyCollision.collision || missileCollision.collision) {
+      if (missileCollision.collision && missileCollision.entity1) {
+        removeEnemyMissile(missileCollision.entity1.id);
+      }
       handlePlayerDeath();
       return;
     }
 
-    // Check player missiles vs enemies
-    for (const missile of playerMissiles) {
-      for (const enemy of enemies) {
-        if (checkCollision(missile, enemy, MISSILE_SIZE, ENEMY_SIZE)) {
-          handlePlayerMissileDestroy(missile.id);
-          const sprite = getSpriteRef(enemy).current;
-          if (sprite) {
-            removeEnemy(enemy.id);
-            const explosion = createEntity(
-              "EXPLOSION",
-              [sprite.x, sprite.y],
-              "ENEMY"
-            );
-            addExplosion(explosion);
-            updateRenderTick();
-            setScore(score + 100);
-          }
-          break;
-        }
-      }
-    }
-
-    // Check enemy missiles vs player
-    for (const missile of enemyMissiles) {
-      if (checkCollision(missile, player, MISSILE_SIZE, PLAYER_SIZE)) {
-        handleEnemyMissileDestroy(missile.id);
-        handlePlayerDeath();
-        break;
+    const missileHit = checkMissileEnemyCollisions();
+    if (missileHit.collision && missileHit.entity1 && missileHit.entity2) {
+      const { entity1: missile, entity2: enemy } = missileHit;
+      removePlayerMissile(missile.id);
+      const sprite = getSpriteRef(enemy).current;
+      if (sprite) {
+        removeEnemy(enemy.id);
+        const explosion = createEntity(
+          "EXPLOSION",
+          [sprite.x, sprite.y],
+          "ENEMY"
+        );
+        addExplosion(explosion);
+        addScore(100);
       }
     }
   });

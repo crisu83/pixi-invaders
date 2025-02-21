@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GameEntity, Point } from "../types";
+import { GameEntity, GameState } from "../types";
 import { createEntity } from "../utils/entity-factory";
 import {
   STAGE_SIZE,
@@ -7,40 +7,6 @@ import {
   ENEMIES_PER_ROW,
   ENEMY_SPACING,
 } from "../constants";
-
-interface GameState {
-  // Game status
-  score: number;
-  gameStarted: boolean;
-  gameOver: boolean;
-  startTime: number;
-
-  // Entities
-  player: GameEntity;
-  enemies: GameEntity[];
-  playerMissiles: GameEntity[];
-  enemyMissiles: GameEntity[];
-  explosions: GameEntity[];
-  velocity: Point;
-
-  // Actions
-  setScore: (score: number) => void;
-  setGameStarted: (started: boolean) => void;
-  setGameOver: (over: boolean) => void;
-  setStartTime: (time: number) => void;
-  setVelocity: (velocity: Point) => void;
-
-  // Entity management
-  initializeGame: () => void;
-  addPlayerMissile: (missile: GameEntity) => void;
-  addEnemyMissile: (missile: GameEntity) => void;
-  addExplosion: (explosion: GameEntity) => void;
-  removePlayerMissile: (id: number) => void;
-  removeEnemyMissile: (id: number) => void;
-  removeExplosion: (id: number) => void;
-  removeEnemy: (id: number) => void;
-  updatePlayer: (player: GameEntity) => void;
-}
 
 const [, stageHeight] = STAGE_SIZE;
 
@@ -58,7 +24,7 @@ export const useGameStore = create<GameState>((set) => ({
   velocity: [0, 0],
 
   // Actions
-  setScore: (score) => set({ score }),
+  addScore: (points) => set((state) => ({ score: state.score + points })),
   setGameStarted: (gameStarted) => set({ gameStarted }),
   setGameOver: (gameOver) => set({ gameOver }),
   setStartTime: (startTime) => set({ startTime }),
