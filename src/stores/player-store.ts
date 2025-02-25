@@ -6,13 +6,13 @@ import { STAGE_SIZE } from "../constants";
 const [, stageHeight] = STAGE_SIZE;
 
 const initialState = {
-  player: createEntity("PLAYER", [0, stageHeight / 3]),
+  player: null,
   velocity: [0, 0] as Point,
 } as const;
 
 type PlayerState = Readonly<{
   // State
-  player: GameEntity;
+  player: GameEntity | null;
   velocity: Point;
 
   // Actions
@@ -27,5 +27,9 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   // Actions
   setVelocity: (velocity) => set({ velocity }),
   updatePlayer: (player) => set({ player }),
-  resetPlayer: () => set(initialState),
+  resetPlayer: () =>
+    set({
+      ...initialState,
+      player: createEntity("PLAYER", [0, stageHeight / 3]),
+    }),
 }));

@@ -42,7 +42,7 @@ export function PlayScene({
     removeEnemyMissile,
     resetMissiles,
   } = useMissileStore();
-  const { enemies, removeEnemy, spawnEnemies, resetEnemies } = useEnemyStore();
+  const { enemies, removeEnemy, resetEnemies } = useEnemyStore();
   const { player, velocity, setVelocity, updatePlayer, resetPlayer } =
     usePlayerStore();
 
@@ -59,23 +59,21 @@ export function PlayScene({
     setRenderTick((prev: number) => prev + 1);
   }, []);
 
-  // Initialize game
+  // Initialize the game
   useEffect(() => {
-    startGame();
     resetScore();
-    resetExplosions();
-    resetMissiles();
-    resetEnemies();
     resetPlayer();
-    spawnEnemies();
+    resetEnemies();
+    resetMissiles();
+    resetExplosions();
+    startGame();
   }, [
-    startGame,
     resetScore,
-    resetExplosions,
-    resetMissiles,
-    resetEnemies,
     resetPlayer,
-    spawnEnemies,
+    resetEnemies,
+    resetMissiles,
+    resetExplosions,
+    startGame,
   ]);
 
   const handlePlayerMove = useCallback(
@@ -131,6 +129,7 @@ export function PlayScene({
     if (gameOver) return;
     endGame();
 
+    if (!player) return;
     const sprite = getSpriteRef(player).current;
     if (sprite) {
       updatePlayer(setAlive(player, false));
@@ -220,12 +219,14 @@ export function PlayScene({
           position={[stageWidth / 2 - 20, -stageHeight / 2 + 15]}
           visible={showStats}
         />
-        <Player
-          entity={player}
-          onMove={handlePlayerMove}
-          onMissileSpawn={handlePlayerMissileSpawn}
-          ref={getSpriteRef(player)}
-        />
+        {player && (
+          <Player
+            entity={player}
+            onMove={handlePlayerMove}
+            onMissileSpawn={handlePlayerMissileSpawn}
+            ref={getSpriteRef(player)}
+          />
+        )}
         <EnemyGrid enemies={enemies} onMissileSpawn={handleEnemyMissileSpawn} />
         <MissileGroup
           playerMissiles={playerMissiles}

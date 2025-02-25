@@ -19,7 +19,6 @@ type EnemyState = Readonly<{
   enemies: GameEntity[];
 
   // Actions
-  spawnEnemies: () => void;
   removeEnemy: (id: number) => void;
   resetEnemies: () => void;
 }>;
@@ -28,7 +27,12 @@ export const useEnemyStore = create<EnemyState>((set) => ({
   ...initialState,
 
   // Actions
-  spawnEnemies: () => {
+  removeEnemy: (id) =>
+    set((state) => ({
+      enemies: state.enemies.filter((e) => e.id !== id),
+    })),
+
+  resetEnemies: () => {
     const newEnemies: GameEntity[] = [];
     for (const row of Array.from({ length: ENEMY_ROWS }, (_, i) => i)) {
       for (const col of Array.from({ length: ENEMIES_PER_ROW }, (_, i) => i)) {
@@ -39,11 +43,4 @@ export const useEnemyStore = create<EnemyState>((set) => ({
     }
     set({ enemies: newEnemies });
   },
-
-  removeEnemy: (id) =>
-    set((state) => ({
-      enemies: state.enemies.filter((e) => e.id !== id),
-    })),
-
-  resetEnemies: () => set(initialState),
 }));

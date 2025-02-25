@@ -19,14 +19,10 @@ export const useGameStore = create<GameState>((set) => ({
   ...initialState,
 
   // Actions
-  endGame: () =>
-    set({
-      ...initialState,
-      gameOver: true,
-    }),
-  startGame: () =>
-    set({
-      ...initialState,
-      gameStarted: true,
-    }),
+  endGame: () => {
+    set({ ...initialState, gameOver: true });
+  },
+  startGame: () => {
+    set({ ...initialState, gameStarted: true });
+  },
 }));
