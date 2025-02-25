@@ -1,5 +1,11 @@
 import { create } from "zustand";
 
+const initialState = {
+  score: 0,
+  combo: 0,
+  lastKillTime: 0,
+} as const;
+
 type ScoreState = Readonly<{
   // State
   score: number;
@@ -12,10 +18,7 @@ type ScoreState = Readonly<{
 }>;
 
 export const useScoreStore = create<ScoreState>((set) => ({
-  // Initial state
-  score: 0,
-  combo: 0,
-  lastKillTime: 0,
+  ...initialState,
 
   // Actions
   addScore: (points) =>
@@ -32,10 +35,5 @@ export const useScoreStore = create<ScoreState>((set) => ({
       };
     }),
 
-  resetScore: () =>
-    set({
-      score: 0,
-      combo: 0,
-      lastKillTime: 0,
-    }),
+  resetScore: () => set(initialState),
 }));

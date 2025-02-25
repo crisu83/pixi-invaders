@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { GameEntity } from "../types";
 
+const initialState = {
+  explosions: [] as GameEntity[],
+} as const;
+
 type ExplosionState = Readonly<{
   // State
   explosions: GameEntity[];
@@ -12,8 +16,7 @@ type ExplosionState = Readonly<{
 }>;
 
 export const useExplosionStore = create<ExplosionState>((set) => ({
-  // Initial state
-  explosions: [],
+  ...initialState,
 
   // Actions
   addExplosion: (explosion) =>
@@ -26,5 +29,5 @@ export const useExplosionStore = create<ExplosionState>((set) => ({
       explosions: state.explosions.filter((e) => e.id !== id),
     })),
 
-  resetExplosions: () => set({ explosions: [] }),
+  resetExplosions: () => set(initialState),
 }));

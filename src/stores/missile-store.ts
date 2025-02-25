@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { GameEntity } from "../types";
 
+const initialState = {
+  playerMissiles: [] as GameEntity[],
+  enemyMissiles: [] as GameEntity[],
+} as const;
+
 type MissileState = Readonly<{
   // State
   playerMissiles: GameEntity[];
@@ -15,9 +20,7 @@ type MissileState = Readonly<{
 }>;
 
 export const useMissileStore = create<MissileState>((set) => ({
-  // Initial state
-  playerMissiles: [],
-  enemyMissiles: [],
+  ...initialState,
 
   // Actions
   addPlayerMissile: (missile) =>
@@ -40,9 +43,5 @@ export const useMissileStore = create<MissileState>((set) => ({
       enemyMissiles: state.enemyMissiles.filter((m) => m.id !== id),
     })),
 
-  resetMissiles: () =>
-    set({
-      playerMissiles: [],
-      enemyMissiles: [],
-    }),
+  resetMissiles: () => set(initialState),
 }));

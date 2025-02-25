@@ -46,16 +46,8 @@ export type GameState = Readonly<{
   gameStarted: boolean;
   gameOver: boolean;
 
-  // Entities
-  player: GameEntity;
-  velocity: Point;
-
   // Actions
   setGameStarted: (started: boolean) => void;
   setGameOver: (over: boolean) => void;
-  setVelocity: (velocity: Point) => void;
-
-  // Entity management
   initializeGame: () => void;
-  updatePlayer: (player: GameEntity) => void;
 }>;

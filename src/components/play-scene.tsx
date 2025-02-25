@@ -7,6 +7,7 @@ import { useScoreStore } from "../stores/score-store";
 import { useExplosionStore } from "../stores/explosion-store";
 import { useMissileStore } from "../stores/missile-store";
 import { useEnemyStore } from "../stores/enemy-store";
+import { usePlayerStore } from "../stores/player-store";
 import { useCollisionSystem } from "../systems/collision-system";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -28,17 +29,7 @@ export function PlayScene({
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   // Game state from Zustand
-  const {
-    gameStarted,
-    gameOver,
-    player,
-    velocity,
-    setGameOver,
-    updatePlayer,
-    setVelocity,
-    initializeGame,
-  } = useGameStore();
-
+  const { gameStarted, gameOver, setGameOver, initializeGame } = useGameStore();
   const { score, combo, addScore, resetScore } = useScoreStore();
   const { explosions, addExplosion, removeExplosion, resetExplosions } =
     useExplosionStore();
@@ -52,6 +43,8 @@ export function PlayScene({
     resetMissiles,
   } = useMissileStore();
   const { enemies, removeEnemy, spawnEnemies, resetEnemies } = useEnemyStore();
+  const { player, velocity, setVelocity, updatePlayer, resetPlayer } =
+    usePlayerStore();
 
   const {
     checkMissileEnemyCollisions,
@@ -73,6 +66,7 @@ export function PlayScene({
     resetExplosions();
     resetMissiles();
     resetEnemies();
+    resetPlayer();
     spawnEnemies();
   }, [
     initializeGame,
@@ -80,6 +74,7 @@ export function PlayScene({
     resetExplosions,
     resetMissiles,
     resetEnemies,
+    resetPlayer,
     spawnEnemies,
   ]);
 

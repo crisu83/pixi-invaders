@@ -10,6 +10,10 @@ import {
 
 const [, stageHeight] = STAGE_SIZE;
 
+const initialState = {
+  enemies: [] as GameEntity[],
+} as const;
+
 type EnemyState = Readonly<{
   // State
   enemies: GameEntity[];
@@ -21,8 +25,7 @@ type EnemyState = Readonly<{
 }>;
 
 export const useEnemyStore = create<EnemyState>((set) => ({
-  // Initial state
-  enemies: [],
+  ...initialState,
 
   // Actions
   spawnEnemies: () => {
@@ -42,5 +45,5 @@ export const useEnemyStore = create<EnemyState>((set) => ({
       enemies: state.enemies.filter((e) => e.id !== id),
     })),
 
-  resetEnemies: () => set({ enemies: [] }),
+  resetEnemies: () => set(initialState),
 }));
