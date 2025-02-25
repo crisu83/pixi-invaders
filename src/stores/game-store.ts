@@ -13,12 +13,10 @@ const [, stageHeight] = STAGE_SIZE;
 const initialState = {
   gameStarted: false,
   gameOver: false,
-  startTime: 0,
   player: createEntity("PLAYER", [0, stageHeight / 3]),
   enemies: [],
   playerMissiles: [],
   enemyMissiles: [],
-  explosions: [],
   velocity: [0, 0] as [number, number],
 };
 
@@ -47,12 +45,10 @@ export const useGameStore = create<GameState>((set) => ({
       return {
         ...state,
         enemies: newEnemies,
-        startTime: performance.now(),
         gameStarted: true,
         gameOver: false,
         playerMissiles: [],
         enemyMissiles: [],
-        explosions: [],
         velocity: [0, 0],
         player: createEntity("PLAYER", [0, stageHeight / 3]),
       };
@@ -68,11 +64,6 @@ export const useGameStore = create<GameState>((set) => ({
       enemyMissiles: [...state.enemyMissiles, missile],
     })),
 
-  addExplosion: (explosion) =>
-    set((state) => ({
-      explosions: [...state.explosions, explosion],
-    })),
-
   removePlayerMissile: (id) =>
     set((state) => ({
       playerMissiles: state.playerMissiles.filter((m) => m.id !== id),
@@ -81,11 +72,6 @@ export const useGameStore = create<GameState>((set) => ({
   removeEnemyMissile: (id) =>
     set((state) => ({
       enemyMissiles: state.enemyMissiles.filter((m) => m.id !== id),
-    })),
-
-  removeExplosion: (id) =>
-    set((state) => ({
-      explosions: state.explosions.filter((e) => e.id !== id),
     })),
 
   removeEnemy: (id) =>
