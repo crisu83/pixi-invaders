@@ -1,12 +1,9 @@
 import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
-import {
-  STAGE_SIZE,
-  MAX_TIME_BONUS,
-  TIME_PENALTY_PER_SECOND,
-} from "../constants";
+import { STAGE_SIZE } from "../constants";
 import { Point } from "../types";
 import { useGameStore } from "../stores/game-store";
+import { useScoreStore } from "../stores/score-store";
 import { useCollisionSystem } from "../systems/collision-system";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -16,7 +13,7 @@ import { ExplosionGroup } from "./explosion-group";
 import { MissileGroup } from "./missile-group";
 import { Player } from "./player";
 import { PerformanceStats } from "./performance-stats";
-import { ScoreText } from "./text";
+import { ScoreText, ComboText } from "./text";
 
 export function PlayScene({
   onGameOver,
@@ -29,10 +26,8 @@ export function PlayScene({
 
   // Game state from Zustand
   const {
-    score,
     gameStarted,
     gameOver,
-    startTime,
     player,
     enemies,
     playerMissiles,
@@ -50,8 +45,9 @@ export function PlayScene({
     removeEnemy,
     setVelocity,
     initializeGame,
-    addScore,
   } = useGameStore();
+
+  const { score, combo, addScore, resetScore } = useScoreStore();
 
   const {
     checkMissileEnemyCollisions,
@@ -69,7 +65,8 @@ export function PlayScene({
   // Initialize game
   useEffect(() => {
     initializeGame();
-  }, [initializeGame]);
+    resetScore();
+  }, [initializeGame, resetScore]);
 
   const handlePlayerMove = useCallback(
     (velocity: Point) => {
@@ -161,14 +158,7 @@ export function PlayScene({
 
     // Check for victory when all enemies are destroyed
     if (enemies.length === 0) {
-      // Calculate time bonus
-      const gameTime = (performance.now() - startTime) / 1000;
-      const timeBonus = Math.max(
-        0,
-        Math.round(MAX_TIME_BONUS - gameTime * TIME_PENALTY_PER_SECOND)
-      );
-      const finalScore = score + timeBonus;
-      onVictory(finalScore);
+      onVictory(score);
       return;
     }
 
@@ -210,6 +200,10 @@ export function PlayScene({
         <ScoreText
           value={score}
           position={[-stageWidth / 2 + 20, -stageHeight / 2 + 15]}
+        />
+        <ComboText
+          combo={combo}
+          position={[-stageWidth / 2 + 20, -stageHeight / 2 + 45]}
         />
         <PerformanceStats
           renderTick={renderTick}

@@ -37,7 +37,7 @@ export function PressAnyKeyText({ y }: { y: number }) {
 
   return (
     <Text
-      text="press any key to restart"
+      text="PRESS ANY KEY TO RESTART"
       anchor={[0.5, 0.5]}
       y={y}
       style={style}
@@ -62,4 +62,18 @@ export function ScoreText({
       anchor={[0, 0]}
     />
   );
+}
+
+export function ComboText({
+  combo,
+  position,
+}: {
+  combo: number;
+  position: Point;
+}) {
+  const style = useTextStyle({ fontSize: 16 });
+  const multiplier = Math.min(4, 1 + (combo - 1) * 0.5);
+  const text = combo > 1 ? `${combo}x COMBO! (${multiplier.toFixed(1)}x)` : "";
+
+  return <Text text={text} position={position} style={style} anchor={[0, 0]} />;
 }

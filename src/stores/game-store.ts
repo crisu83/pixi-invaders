@@ -10,9 +10,7 @@ import {
 
 const [, stageHeight] = STAGE_SIZE;
 
-export const useGameStore = create<GameState>((set) => ({
-  // Initial state
-  score: 0,
+const initialState = {
   gameStarted: false,
   gameOver: false,
   startTime: 0,
@@ -21,13 +19,15 @@ export const useGameStore = create<GameState>((set) => ({
   playerMissiles: [],
   enemyMissiles: [],
   explosions: [],
-  velocity: [0, 0],
+  velocity: [0, 0] as [number, number],
+};
+
+export const useGameStore = create<GameState>((set) => ({
+  ...initialState,
 
   // Actions
-  addScore: (points) => set((state) => ({ score: state.score + points })),
   setGameStarted: (gameStarted) => set({ gameStarted }),
   setGameOver: (gameOver) => set({ gameOver }),
-  setStartTime: (startTime) => set({ startTime }),
   setVelocity: (velocity) => set({ velocity }),
 
   // Entity management
@@ -50,7 +50,6 @@ export const useGameStore = create<GameState>((set) => ({
         startTime: performance.now(),
         gameStarted: true,
         gameOver: false,
-        score: 0,
         playerMissiles: [],
         enemyMissiles: [],
         explosions: [],
@@ -60,13 +59,19 @@ export const useGameStore = create<GameState>((set) => ({
     }),
 
   addPlayerMissile: (missile) =>
-    set((state) => ({ playerMissiles: [...state.playerMissiles, missile] })),
+    set((state) => ({
+      playerMissiles: [...state.playerMissiles, missile],
+    })),
 
   addEnemyMissile: (missile) =>
-    set((state) => ({ enemyMissiles: [...state.enemyMissiles, missile] })),
+    set((state) => ({
+      enemyMissiles: [...state.enemyMissiles, missile],
+    })),
 
   addExplosion: (explosion) =>
-    set((state) => ({ explosions: [...state.explosions, explosion] })),
+    set((state) => ({
+      explosions: [...state.explosions, explosion],
+    })),
 
   removePlayerMissile: (id) =>
     set((state) => ({

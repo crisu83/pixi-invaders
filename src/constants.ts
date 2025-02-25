@@ -7,10 +7,6 @@ export const STAGE_SIZE: Size = [800, 600];
 export const STARS_SIZE: Size = [128, 128];
 export const STAGE_MARGIN = 100;
 
-// Scoring constants
-export const MAX_TIME_BONUS = 3000;
-export const TIME_PENALTY_PER_SECOND = 300;
-
 export const PLAYER_SIZE: Size = [20, 20];
 export const PLAYER_SPEED = 3;
 export const PLAYER_BOOST_MULTIPLIER = 1.5;

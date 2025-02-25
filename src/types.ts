@@ -43,10 +43,8 @@ export type GameEntity = Readonly<{
 
 export type GameState = Readonly<{
   // Game status
-  score: number;
   gameStarted: boolean;
   gameOver: boolean;
-  startTime: number;
 
   // Entities
   player: GameEntity;
@@ -57,10 +55,8 @@ export type GameState = Readonly<{
   velocity: Point;
 
   // Actions
-  addScore: (points: number) => void;
   setGameStarted: (started: boolean) => void;
   setGameOver: (over: boolean) => void;
-  setStartTime: (time: number) => void;
   setVelocity: (velocity: Point) => void;
 
   // Entity management
