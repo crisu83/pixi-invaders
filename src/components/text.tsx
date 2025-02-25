@@ -75,5 +75,13 @@ export function ComboText({
   const multiplier = Math.min(4, 1 + (combo - 1) * 0.5);
   const text = combo > 1 ? `${combo}x COMBO! (${multiplier.toFixed(1)}x)` : "";
 
-  return <Text text={text} position={position} style={style} anchor={[0, 0]} />;
+  return (
+    <Text
+      text={text}
+      tint={0xff9900}
+      position={position}
+      style={style}
+      anchor={[0, 0]}
+    />
+  );
 }

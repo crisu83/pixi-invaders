@@ -8,7 +8,7 @@ export function GameOverScene({ score }: { score: number }) {
   return (
     <Container position={[stageWidth / 2, stageHeight / 2]}>
       <Container position={[0, -60]}>
-        <TitleText>GAME OVER</TitleText>
+        <TitleText>GAME OVER!</TitleText>
         <FinalScoreText score={score} y={60} />
         <PressAnyKeyText y={120} />
       </Container>
