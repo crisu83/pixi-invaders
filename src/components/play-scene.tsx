@@ -29,7 +29,7 @@ export function PlayScene({
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   // Game state from Zustand
-  const { gameStarted, gameOver, setGameOver, initializeGame } = useGameStore();
+  const { gameStarted, gameOver, endGame, startGame } = useGameStore();
   const { score, combo, addScore, resetScore } = useScoreStore();
   const { explosions, addExplosion, removeExplosion, resetExplosions } =
     useExplosionStore();
@@ -61,7 +61,7 @@ export function PlayScene({
 
   // Initialize game
   useEffect(() => {
-    initializeGame();
+    startGame();
     resetScore();
     resetExplosions();
     resetMissiles();
@@ -69,7 +69,7 @@ export function PlayScene({
     resetPlayer();
     spawnEnemies();
   }, [
-    initializeGame,
+    startGame,
     resetScore,
     resetExplosions,
     resetMissiles,
@@ -129,7 +129,7 @@ export function PlayScene({
 
   const handlePlayerDeath = useCallback(() => {
     if (gameOver) return;
-    setGameOver(true);
+    endGame();
 
     const sprite = getSpriteRef(player).current;
     if (sprite) {
@@ -146,7 +146,7 @@ export function PlayScene({
     player,
     updatePlayer,
     addExplosion,
-    setGameOver,
+    endGame,
     updateRenderTick,
   ]);
 

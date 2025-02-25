@@ -40,14 +40,3 @@ export type GameEntity = Readonly<{
   type: EntityType;
   components: readonly GameComponent[];
 }>;
-
-export type GameState = Readonly<{
-  // Game status
-  gameStarted: boolean;
-  gameOver: boolean;
-
-  // Actions
-  setGameStarted: (started: boolean) => void;
-  setGameOver: (over: boolean) => void;
-  initializeGame: () => void;
-}>;
