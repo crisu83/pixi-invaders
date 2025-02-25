@@ -15,8 +15,6 @@ const initialState = {
   gameOver: false,
   player: createEntity("PLAYER", [0, stageHeight / 3]),
   enemies: [],
-  playerMissiles: [],
-  enemyMissiles: [],
   velocity: [0, 0] as [number, number],
 };
 
@@ -47,32 +45,10 @@ export const useGameStore = create<GameState>((set) => ({
         enemies: newEnemies,
         gameStarted: true,
         gameOver: false,
-        playerMissiles: [],
-        enemyMissiles: [],
         velocity: [0, 0],
         player: createEntity("PLAYER", [0, stageHeight / 3]),
       };
     }),
-
-  addPlayerMissile: (missile) =>
-    set((state) => ({
-      playerMissiles: [...state.playerMissiles, missile],
-    })),
-
-  addEnemyMissile: (missile) =>
-    set((state) => ({
-      enemyMissiles: [...state.enemyMissiles, missile],
-    })),
-
-  removePlayerMissile: (id) =>
-    set((state) => ({
-      playerMissiles: state.playerMissiles.filter((m) => m.id !== id),
-    })),
-
-  removeEnemyMissile: (id) =>
-    set((state) => ({
-      enemyMissiles: state.enemyMissiles.filter((m) => m.id !== id),
-    })),
 
   removeEnemy: (id) =>
     set((state) => ({

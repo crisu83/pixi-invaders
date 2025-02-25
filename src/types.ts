@@ -49,8 +49,6 @@ export type GameState = Readonly<{
   // Entities
   player: GameEntity;
   enemies: GameEntity[];
-  playerMissiles: GameEntity[];
-  enemyMissiles: GameEntity[];
   velocity: Point;
 
   // Actions
@@ -60,10 +58,6 @@ export type GameState = Readonly<{
 
   // Entity management
   initializeGame: () => void;
-  addPlayerMissile: (missile: GameEntity) => void;
-  addEnemyMissile: (missile: GameEntity) => void;
-  removePlayerMissile: (id: number) => void;
-  removeEnemyMissile: (id: number) => void;
   removeEnemy: (id: number) => void;
   updatePlayer: (player: GameEntity) => void;
 }>;
