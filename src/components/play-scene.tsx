@@ -8,7 +8,7 @@ import { useExplosionStore } from "../stores/explosion-store";
 import { useMissileStore } from "../stores/missile-store";
 import { useEnemyStore } from "../stores/enemy-store";
 import { usePlayerStore } from "../stores/player-store";
-import { useCollisionSystem } from "../systems/collision-system";
+import { useCollisionChecker } from "../utils/collision-checker";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
 import { Background } from "./background";
@@ -50,7 +50,7 @@ export function PlayScene({
     checkMissileEnemyCollisions,
     checkMissilePlayerCollisions,
     checkEnemyPlayerCollisions,
-  } = useCollisionSystem();
+  } = useCollisionChecker();
 
   const [renderTick, setRenderTick] = useState<number>(0);
   const [showStats, setShowStats] = useState<boolean>(false);

@@ -47,19 +47,19 @@ function checkBoundingBoxCollision(
   );
 }
 
-type CollisionSystemDeps = {
-  player: GameEntity;
+type CollisionCheckerDeps = {
+  player: GameEntity | null;
   enemies: GameEntity[];
   playerMissiles: GameEntity[];
   enemyMissiles: GameEntity[];
 };
 
-export function createCollisionSystem({
+export function createCollisionChecker({
   player,
   enemies,
   playerMissiles,
   enemyMissiles,
-}: CollisionSystemDeps) {
+}: CollisionCheckerDeps) {
   return {
     checkMissileEnemyCollisions: (): CollisionResult => {
       for (const missile of playerMissiles) {
@@ -79,6 +79,7 @@ export function createCollisionSystem({
     },
 
     checkMissilePlayerCollisions: (): CollisionResult => {
+      if (!player) return { collision: false };
       for (const missile of enemyMissiles) {
         if (
           checkBoundingBoxCollision(missile, player, MISSILE_SIZE, PLAYER_SIZE)
@@ -94,6 +95,7 @@ export function createCollisionSystem({
     },
 
     checkEnemyPlayerCollisions: (): CollisionResult => {
+      if (!player) return { collision: false };
       const sprite = getSpriteRef(player).current;
       if (!sprite) return { collision: false };
 
@@ -112,13 +114,18 @@ export function createCollisionSystem({
   };
 }
 
-export function useCollisionSystem() {
+export function useCollisionChecker() {
   const { player } = usePlayerStore();
   const { playerMissiles, enemyMissiles } = useMissileStore();
   const { enemies } = useEnemyStore();
   return useMemo(
     () =>
-      createCollisionSystem({ player, enemies, playerMissiles, enemyMissiles }),
+      createCollisionChecker({
+        player,
+        enemies,
+        playerMissiles,
+        enemyMissiles,
+      }),
     [player, enemies, playerMissiles, enemyMissiles]
   );
 }

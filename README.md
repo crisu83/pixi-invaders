@@ -8,30 +8,29 @@ A Space Invaders clone built with PixiJS and React.
 - PixiJS 7.3 (via @pixi/react 7.1)
 - TypeScript 5.7
 - Vite 6.1
-- Zustand 4.x (State Management)
+- Zustand 4.x
 
 ## Game Architecture
 
 The game uses a modern, functional architecture:
 
-### Entity System
-- Entities are stored in refs to avoid unnecessary re-renders
-- Each entity has a ref to its PixiJS sprite for direct manipulation
-- Entity groups (missiles, enemies, etc.) are managed in dedicated components
-- Component-based architecture for reusable game logic
+### Entity Component System (ECS)
+- Entities are composed of reusable components (Sprite, Movement, Explosive)
+- Each component handles a specific aspect of entity behavior
+- Pure functions for component operations
+- Component-based architecture for flexible game logic
 
 ### State Management
-- Centralized game state using Zustand
-- Manages game status (score, game state, timers)
-- Handles all game entities (player, enemies, missiles)
-- Provides actions for entity lifecycle (spawn, destroy)
-- Ensures predictable state updates and easier debugging
+- Dedicated stores for each entity type (player, enemies, missiles)
+- Clean separation of concerns between game elements
+- Predictable state updates using Zustand
+- Each store manages its own initialization and cleanup
 
-### Systems
-The game logic is organized into pure functional systems:
-- Each system is a collection of pure functions that operate on game state
-- Systems are created with factory functions that receive game state
-- Hooks provide React components access to systems
+### Utilities
+- Collision checking between game entities
+- Entity factory for creating game objects
+- Component utilities for common operations
+- Sprite management and texture handling
 
 ## Controls
 
