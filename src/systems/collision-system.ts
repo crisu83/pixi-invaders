@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ENEMY_SIZE, MISSILE_SIZE, PLAYER_SIZE } from "../constants";
 import { useGameStore } from "../stores/game-store";
 import { useMissileStore } from "../stores/missile-store";
+import { useEnemyStore } from "../stores/enemy-store";
 import { GameEntity, Size } from "../types";
 import { getSpriteRef } from "../utils/components";
 
@@ -112,8 +113,9 @@ export function createCollisionSystem({
 }
 
 export function useCollisionSystem() {
-  const { player, enemies } = useGameStore();
+  const { player } = useGameStore();
   const { playerMissiles, enemyMissiles } = useMissileStore();
+  const { enemies } = useEnemyStore();
   return useMemo(
     () =>
       createCollisionSystem({ player, enemies, playerMissiles, enemyMissiles }),

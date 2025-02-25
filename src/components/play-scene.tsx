@@ -6,6 +6,7 @@ import { useGameStore } from "../stores/game-store";
 import { useScoreStore } from "../stores/score-store";
 import { useExplosionStore } from "../stores/explosion-store";
 import { useMissileStore } from "../stores/missile-store";
+import { useEnemyStore } from "../stores/enemy-store";
 import { useCollisionSystem } from "../systems/collision-system";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -31,11 +32,9 @@ export function PlayScene({
     gameStarted,
     gameOver,
     player,
-    enemies,
     velocity,
     setGameOver,
     updatePlayer,
-    removeEnemy,
     setVelocity,
     initializeGame,
   } = useGameStore();
@@ -52,6 +51,7 @@ export function PlayScene({
     removeEnemyMissile,
     resetMissiles,
   } = useMissileStore();
+  const { enemies, removeEnemy, spawnEnemies, resetEnemies } = useEnemyStore();
 
   const {
     checkMissileEnemyCollisions,
@@ -72,7 +72,16 @@ export function PlayScene({
     resetScore();
     resetExplosions();
     resetMissiles();
-  }, [initializeGame, resetScore, resetExplosions, resetMissiles]);
+    resetEnemies();
+    spawnEnemies();
+  }, [
+    initializeGame,
+    resetScore,
+    resetExplosions,
+    resetMissiles,
+    resetEnemies,
+    spawnEnemies,
+  ]);
 
   const handlePlayerMove = useCallback(
     (velocity: Point) => {

@@ -1,0 +1,46 @@
+import { create } from "zustand";
+import { GameEntity } from "../types";
+import { createEntity } from "../utils/entity-factory";
+import {
+  STAGE_SIZE,
+  ENEMY_ROWS,
+  ENEMIES_PER_ROW,
+  ENEMY_SPACING,
+} from "../constants";
+
+const [, stageHeight] = STAGE_SIZE;
+
+type EnemyState = Readonly<{
+  // State
+  enemies: GameEntity[];
+
+  // Actions
+  spawnEnemies: () => void;
+  removeEnemy: (id: number) => void;
+  resetEnemies: () => void;
+}>;
+
+export const useEnemyStore = create<EnemyState>((set) => ({
+  // Initial state
+  enemies: [],
+
+  // Actions
+  spawnEnemies: () => {
+    const newEnemies: GameEntity[] = [];
+    for (const row of Array.from({ length: ENEMY_ROWS }, (_, i) => i)) {
+      for (const col of Array.from({ length: ENEMIES_PER_ROW }, (_, i) => i)) {
+        const x = (col - (ENEMIES_PER_ROW - 1) / 2) * ENEMY_SPACING[0];
+        const y = -stageHeight / 3 + row * ENEMY_SPACING[1];
+        newEnemies.push(createEntity("ENEMY", [x, y]));
+      }
+    }
+    set({ enemies: newEnemies });
+  },
+
+  removeEnemy: (id) =>
+    set((state) => ({
+      enemies: state.enemies.filter((e) => e.id !== id),
+    })),
+
+  resetEnemies: () => set({ enemies: [] }),
+}));
