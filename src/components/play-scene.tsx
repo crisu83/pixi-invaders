@@ -1,7 +1,7 @@
 import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
 import { STAGE_SIZE } from "../constants";
-import { Point } from "../types";
+import { GameEntity, Point } from "../types";
 import { useGameStore } from "../stores/game-store";
 import { useScoreStore } from "../stores/score-store";
 import { useExplosionStore } from "../stores/explosion-store";
@@ -50,6 +50,7 @@ export function PlayScene({
     checkMissileEnemyCollisions,
     checkMissilePlayerCollisions,
     checkEnemyPlayerCollisions,
+    resetCollisionChecks,
   } = useCollisionChecker();
 
   const [renderTick, setRenderTick] = useState<number>(0);
@@ -149,6 +150,24 @@ export function PlayScene({
     updateRenderTick,
   ]);
 
+  const handleEnemyDeath = useCallback(
+    (enemy: GameEntity) => {
+      const sprite = getSpriteRef(enemy).current;
+      if (sprite) {
+        removeEnemy(enemy.id);
+        const explosion = createEntity(
+          "EXPLOSION",
+          [sprite.x, sprite.y],
+          "ENEMY"
+        );
+        addExplosion(explosion);
+        addScore(100);
+        updateRenderTick();
+      }
+    },
+    [addExplosion, addScore, removeEnemy, updateRenderTick]
+  );
+
   // Handle stats toggle
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -171,6 +190,9 @@ export function PlayScene({
       return;
     }
 
+    // Reset collision checks at the start of each tick
+    resetCollisionChecks();
+
     // Check collisions
     const enemyCollision = checkEnemyPlayerCollisions();
     const missileCollision = checkMissilePlayerCollisions();
@@ -186,17 +208,7 @@ export function PlayScene({
     if (missileHit.collision && missileHit.entity1 && missileHit.entity2) {
       const { entity1: missile, entity2: enemy } = missileHit;
       removePlayerMissile(missile.id);
-      const sprite = getSpriteRef(enemy).current;
-      if (sprite) {
-        removeEnemy(enemy.id);
-        const explosion = createEntity(
-          "EXPLOSION",
-          [sprite.x, sprite.y],
-          "ENEMY"
-        );
-        addExplosion(explosion);
-        addScore(100);
-      }
+      handleEnemyDeath(enemy);
     }
   });
 
