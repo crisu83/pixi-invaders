@@ -42,7 +42,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     resetMissiles,
   } = useMissileStore();
   const { enemies, removeEnemy, resetEnemies } = useEnemyStore();
-  const { player, velocity, setVelocity, updatePlayer, resetPlayer } =
+  const { player, setPlayerVelocity, updatePlayer, resetPlayer } =
     usePlayerStore();
 
   const {
@@ -78,9 +78,9 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
   const handlePlayerMove = useCallback(
     (velocity: Point) => {
-      setVelocity(velocity);
+      setPlayerVelocity(velocity);
     },
-    [setVelocity]
+    [setPlayerVelocity]
   );
 
   const handlePlayerMissileSpawn = useCallback(
@@ -214,7 +214,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   return (
     <>
       <Container>
-        <Background velocityRef={{ current: velocity }} />
+        <Background />
       </Container>
       <Container position={[stageWidth / 2, stageHeight / 2]}>
         <ScoreText
