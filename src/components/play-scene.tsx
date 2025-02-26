@@ -58,7 +58,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [showStats, setShowStats] = useState<boolean>(false);
   const { isActionActive } = useInputStore();
 
-  const playSound = useAudioStore((state) => state.playSound);
+  const { playSound, playMusic, stopMusic } = useAudioStore();
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev: number) => prev + 1);
@@ -80,6 +80,12 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     resetExplosions,
     startGame,
   ]);
+
+  // Play music when scene mounts, stop when unmounting
+  useEffect(() => {
+    playMusic();
+    return () => stopMusic();
+  }, [playMusic, stopMusic]);
 
   const handlePlayerMove = useCallback(
     (velocity: Point) => {

@@ -10,16 +10,17 @@ type GameOverSceneProps = {
 
 export function GameOverScene({ score }: GameOverSceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
-  const playSound = useAudioStore((state) => state.playSound);
+  const { playSound, stopMusic } = useAudioStore();
 
   useEffect(() => {
+    stopMusic();
     playSound("GAME_OVER");
-  }, [playSound]);
+  }, [playSound, stopMusic]);
 
   return (
     <Container position={[stageWidth / 2, stageHeight / 2]}>
       <Container position={[0, -60]}>
-        <TitleText>GAME OVER!</TitleText>
+        <TitleText>GAME OVER</TitleText>
         <FinalScoreText score={score} y={60} />
         <ActionText y={120}>PRESS ENTER TO RESTART</ActionText>
       </Container>

@@ -44,3 +44,8 @@ The game uses a modern, functional architecture:
 - `pnpm dev` - Start development server
 - `pnpm build` - Build for production
 - `pnpm preview` - Preview production build
+
+# Credits
+
+- Code by [@crisu83](https://github.com/crisu83)
+- Music by [Ian Aisling](https://uppbeat.io/t/ian-aisling/oblanka)

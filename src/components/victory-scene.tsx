@@ -10,11 +10,12 @@ type VictorySceneProps = {
 
 export function VictoryScene({ score }: VictorySceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
-  const playSound = useAudioStore((state) => state.playSound);
+  const { playSound, stopMusic } = useAudioStore();
 
   useEffect(() => {
+    stopMusic();
     playSound("VICTORY");
-  }, [playSound]);
+  }, [playSound, stopMusic]);
 
   return (
     <Container position={[stageWidth / 2, stageHeight / 2]}>

@@ -7,6 +7,7 @@ type InputAction =
   | "SHOOT"
   | "BOOST"
   | "TOGGLE_STATS"
+  | "TOGGLE_MUSIC"
   | "RESTART"
   | "ANY";
 
@@ -36,6 +37,7 @@ const DEFAULT_BINDINGS: readonly InputBinding[] = [
   { keys: ["Space"], action: "SHOOT", cooldown: MISSILE_COOLDOWN },
   { keys: ["ShiftLeft", "ShiftRight"], action: "BOOST" },
   { keys: ["Backquote"], action: "TOGGLE_STATS", cooldown: TOGGLE_COOLDOWN },
+  { keys: ["KeyM"], action: "TOGGLE_MUSIC", cooldown: TOGGLE_COOLDOWN },
   { keys: ["Enter"], action: "RESTART" },
 ] as const;
 
@@ -48,6 +50,7 @@ const initialState = {
       "SHOOT",
       "BOOST",
       "TOGGLE_STATS",
+      "TOGGLE_MUSIC",
       "ANY",
       "RESTART",
     ].map((action) => [action as InputAction, 0])

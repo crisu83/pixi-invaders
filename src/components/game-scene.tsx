@@ -5,11 +5,13 @@ import { GameOverScene } from "./game-over-scene";
 import { PlayScene } from "./play-scene";
 import { GameState } from "../types";
 import { useInputStore } from "../stores/input-store";
+import { useAudioStore } from "../stores/audio-store";
 
 export function GameScene() {
   const [gameState, setGameState] = useState<GameState>("START");
   const [score, setScore] = useState(0);
   const { isActionActive, resetActiveKeys } = useInputStore();
+  const { toggleMuted } = useAudioStore();
 
   useEffect(() => {
     const checkSceneTransition = () => {
@@ -33,6 +35,18 @@ export function GameScene() {
     const interval = setInterval(checkSceneTransition, 100);
     return () => clearInterval(interval);
   }, [gameState, isActionActive, resetActiveKeys]);
+
+  // Handle music mute toggle
+  useEffect(() => {
+    const checkMusicToggle = () => {
+      if (isActionActive("TOGGLE_MUSIC")) {
+        toggleMuted();
+      }
+    };
+
+    const interval = setInterval(checkMusicToggle, 100);
+    return () => clearInterval(interval);
+  }, [isActionActive, toggleMuted]);
 
   switch (gameState) {
     case "START":
