@@ -9,17 +9,22 @@ import { useInputStore } from "../stores/input-store";
 export function GameScene() {
   const [gameState, setGameState] = useState<GameState>("START");
   const [score, setScore] = useState(0);
-  const { isActionActive } = useInputStore();
+  const { isActionActive, resetActiveKeys } = useInputStore();
 
   useEffect(() => {
     const checkSceneTransition = () => {
-      if (isActionActive("ANY")) {
+      if (
+        gameState === "START"
+          ? isActionActive("ANY")
+          : isActionActive("RESTART")
+      ) {
         switch (gameState) {
           case "START":
           case "GAME_OVER":
           case "VICTORY":
             setGameState("PLAYING");
             setScore(0);
+            resetActiveKeys();
             break;
         }
       }
@@ -27,7 +32,7 @@ export function GameScene() {
 
     const interval = setInterval(checkSceneTransition, 100);
     return () => clearInterval(interval);
-  }, [gameState, isActionActive]);
+  }, [gameState, isActionActive, resetActiveKeys]);
 
   switch (gameState) {
     case "START":

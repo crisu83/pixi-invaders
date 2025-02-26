@@ -36,16 +36,16 @@ export function FinalScoreText({ score, y }: FinalScoreTextProps) {
   );
 }
 
-type PressAnyKeyTextProps = {
+type ActionTextProps = PropsWithChildren<{
   y: number;
-};
+}>;
 
-export function PressAnyKeyText({ y }: PressAnyKeyTextProps) {
+export function ActionText({ children, y }: ActionTextProps) {
   const style = useTextStyle({ fontSize: 16 });
 
   return (
     <Text
-      text="PRESS ANY KEY TO RESTART"
+      text={children?.toString() ?? ""}
       anchor={[0.5, 0.5]}
       y={y}
       style={style}

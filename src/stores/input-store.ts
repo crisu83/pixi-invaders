@@ -7,10 +7,11 @@ type InputAction =
   | "SHOOT"
   | "BOOST"
   | "TOGGLE_STATS"
+  | "RESTART"
   | "ANY";
 
 type InputBinding = {
-  keys: string[];
+  keys?: string[];
   action: InputAction;
   cooldown?: number; // Optional cooldown in milliseconds
 };
@@ -19,13 +20,14 @@ type InputStore = Readonly<{
   // State
   activeKeys: Set<string>;
   lastActionTime: Map<InputAction, number>;
+  keyDownTime: Map<string, number>; // Track when each key was pressed
   bindings: InputBinding[];
 
   // Actions
   isActionActive: (action: InputAction) => boolean;
   handleKeyDown: (e: KeyboardEvent) => void;
   handleKeyUp: (e: KeyboardEvent) => void;
-  reset: () => void;
+  resetActiveKeys: () => void;
 }>;
 
 const DEFAULT_BINDINGS: readonly InputBinding[] = [
@@ -34,20 +36,28 @@ const DEFAULT_BINDINGS: readonly InputBinding[] = [
   { keys: ["Space"], action: "SHOOT", cooldown: MISSILE_COOLDOWN },
   { keys: ["ShiftLeft", "ShiftRight"], action: "BOOST" },
   { keys: ["Backquote"], action: "TOGGLE_STATS", cooldown: TOGGLE_COOLDOWN },
+  { keys: ["Enter"], action: "RESTART" },
 ] as const;
 
-const createInitialState = () => ({
+const initialState = {
   activeKeys: new Set<string>(),
   lastActionTime: new Map<InputAction, number>(
-    ["MOVE_LEFT", "MOVE_RIGHT", "SHOOT", "BOOST", "TOGGLE_STATS", "ANY"].map(
-      (action) => [action as InputAction, 0]
-    )
+    [
+      "MOVE_LEFT",
+      "MOVE_RIGHT",
+      "SHOOT",
+      "BOOST",
+      "TOGGLE_STATS",
+      "ANY",
+      "RESTART",
+    ].map((action) => [action as InputAction, 0])
   ),
+  keyDownTime: new Map<string, number>(),
   bindings: [...DEFAULT_BINDINGS],
-});
+};
 
 export const useInputStore = create<InputStore>((set, get) => ({
-  ...createInitialState(),
+  ...initialState,
 
   isActionActive: (action: InputAction): boolean => {
     if (action === "ANY") {
@@ -58,41 +68,51 @@ export const useInputStore = create<InputStore>((set, get) => ({
     if (!binding) return false;
 
     const activeKeys = get().activeKeys;
-    const isKeyPressed = binding.keys.some((key) => activeKeys.has(key));
-
-    // For actions without cooldown, just return if the key is pressed
-    if (!binding.cooldown) {
-      return isKeyPressed;
-    }
-
-    // For actions with cooldown, check if enough time has passed
-    const lastActionTime = get().lastActionTime.get(action) || 0;
     const now = Date.now();
-    const isRecentAction = now - lastActionTime < binding.cooldown;
 
-    // If the key is pressed and enough time has passed, update the last action time
-    if (isKeyPressed && !isRecentAction) {
+    // Check if any key is pressed for bindings without specific keys
+    const isKeyPressed = !binding.keys
+      ? activeKeys.size > 0
+      : binding.keys.some((key) => activeKeys.has(key));
+
+    if (!isKeyPressed) return false;
+
+    // Check cooldown if specified
+    if (binding.cooldown) {
+      const lastActionTime = get().lastActionTime.get(action) || 0;
+      const isRecentAction = now - lastActionTime < binding.cooldown;
+
+      if (isRecentAction) return false;
+
+      // Update last action time
       set((state) => ({
         lastActionTime: new Map(state.lastActionTime).set(action, now),
       }));
-      return true;
     }
 
-    return false;
+    return true;
   },
 
   handleKeyDown: (e: KeyboardEvent) => {
+    const now = Date.now();
     set((state) => {
       const newActiveKeys = new Set(Array.from(state.activeKeys));
+      const newKeyDownTime = new Map(state.keyDownTime);
       newActiveKeys.add(e.code);
+
+      // Only set the down time if it's not already set (avoid resetting on key repeat)
+      if (!state.keyDownTime.has(e.code)) {
+        newKeyDownTime.set(e.code, now);
+      }
 
       // Only update ANY action time
       const newLastActionTime = new Map(state.lastActionTime);
-      newLastActionTime.set("ANY", Date.now());
+      newLastActionTime.set("ANY", now);
 
       return {
         activeKeys: newActiveKeys,
         lastActionTime: newLastActionTime,
+        keyDownTime: newKeyDownTime,
       };
     });
   },
@@ -100,12 +120,17 @@ export const useInputStore = create<InputStore>((set, get) => ({
   handleKeyUp: (e: KeyboardEvent) => {
     set((state) => {
       const newActiveKeys = new Set(Array.from(state.activeKeys));
+      const newKeyDownTime = new Map(state.keyDownTime);
       newActiveKeys.delete(e.code);
-      return { activeKeys: newActiveKeys };
+      newKeyDownTime.delete(e.code);
+      return {
+        activeKeys: newActiveKeys,
+        keyDownTime: newKeyDownTime,
+      };
     });
   },
 
-  reset: () => {
-    set(createInitialState());
+  resetActiveKeys: () => {
+    set(initialState);
   },
 }));

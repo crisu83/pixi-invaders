@@ -1,6 +1,6 @@
 import { Container } from "@pixi/react";
 import { STAGE_SIZE } from "../constants";
-import { TitleText, FinalScoreText, PressAnyKeyText } from "./text";
+import { TitleText, FinalScoreText, ActionText } from "./text";
 
 type VictorySceneProps = {
   score: number;
@@ -14,7 +14,7 @@ export function VictoryScene({ score }: VictorySceneProps) {
       <Container position={[0, -60]}>
         <TitleText>VICTORY!</TitleText>
         <FinalScoreText score={score} y={60} />
-        <PressAnyKeyText y={120} />
+        <ActionText y={120}>PRESS ENTER TO RESTART</ActionText>
       </Container>
     </Container>
   );

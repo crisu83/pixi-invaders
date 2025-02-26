@@ -22,6 +22,8 @@ export const MISSILE_COOLDOWN = 250;
 
 export const TOGGLE_COOLDOWN = 100;
 
+export const HOLD_DURATION = 500; // ms
+
 export const ENEMY_SIZE: Size = [20, 20];
 export const ENEMY_SPEED = 1;
 export const ENEMY_SPAWN_INTERVAL = 5000;
