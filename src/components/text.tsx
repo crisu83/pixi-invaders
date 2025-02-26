@@ -3,10 +3,9 @@ import { useTextStyle } from "../hooks/use-text-style";
 import { PropsWithChildren } from "react";
 import { Point } from "../types";
 
-export function TitleText({
-  children,
-  y = 0,
-}: PropsWithChildren<{ y?: number }>) {
+type TitleTextProps = PropsWithChildren<{ y?: number }>;
+
+export function TitleText({ children, y = 0 }: TitleTextProps) {
   const style = useTextStyle({ fontSize: 48 });
 
   return (
@@ -19,7 +18,12 @@ export function TitleText({
   );
 }
 
-export function FinalScoreText({ score, y }: { score: number; y: number }) {
+type FinalScoreTextProps = {
+  score: number;
+  y: number;
+};
+
+export function FinalScoreText({ score, y }: FinalScoreTextProps) {
   const style = useTextStyle({ fontSize: 24 });
 
   return (
@@ -32,7 +36,11 @@ export function FinalScoreText({ score, y }: { score: number; y: number }) {
   );
 }
 
-export function PressAnyKeyText({ y }: { y: number }) {
+type PressAnyKeyTextProps = {
+  y: number;
+};
+
+export function PressAnyKeyText({ y }: PressAnyKeyTextProps) {
   const style = useTextStyle({ fontSize: 16 });
 
   return (
@@ -45,13 +53,12 @@ export function PressAnyKeyText({ y }: { y: number }) {
   );
 }
 
-export function ScoreText({
-  value,
-  position,
-}: {
+type ScoreTextProps = {
   value: number;
   position: Point;
-}) {
+};
+
+export function ScoreText({ value, position }: ScoreTextProps) {
   const style = useTextStyle({ fontSize: 24 });
 
   return (
@@ -64,13 +71,12 @@ export function ScoreText({
   );
 }
 
-export function ComboText({
-  combo,
-  position,
-}: {
+type ComboTextProps = {
   combo: number;
   position: Point;
-}) {
+};
+
+export function ComboText({ combo, position }: ComboTextProps) {
   const style = useTextStyle({ fontSize: 16 });
   const multiplier = Math.min(4, 1 + (combo - 1) * 0.5);
   const text = combo > 1 ? `${combo}x COMBO! (${multiplier.toFixed(1)}x)` : "";

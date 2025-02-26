@@ -2,7 +2,11 @@ import { Container } from "@pixi/react";
 import { STAGE_SIZE } from "../constants";
 import { TitleText, FinalScoreText, PressAnyKeyText } from "./text";
 
-export function VictoryScene({ score }: { score: number }) {
+type VictorySceneProps = {
+  score: number;
+};
+
+export function VictoryScene({ score }: VictorySceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   return (

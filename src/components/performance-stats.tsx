@@ -4,15 +4,17 @@ import { useTextStyle } from "../hooks/use-text-style";
 import { Point } from "../types";
 import { useCollisionStore } from "../stores/collision-store";
 
+type PerformanceStatsProps = {
+  renderTick: number;
+  position: Point;
+  visible: boolean;
+};
+
 export function PerformanceStats({
   renderTick,
   position,
   visible,
-}: {
-  renderTick: number;
-  position: Point;
-  visible: boolean;
-}) {
+}: PerformanceStatsProps) {
   const style = useTextStyle({ fontSize: 10 });
   const lastTime = useRef(performance.now());
   const frameCount = useRef(0);

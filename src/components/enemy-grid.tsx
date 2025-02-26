@@ -11,13 +11,12 @@ import { STAGE_SIZE } from "../constants";
 import { GameEntity, Point } from "../types";
 import { getSpriteRef, isAlive } from "../utils/components";
 
-export function EnemyGrid({
-  enemies,
-  onMissileSpawn,
-}: {
+type EnemyGridProps = {
   enemies: GameEntity[];
   onMissileSpawn: (position: Point) => void;
-}) {
+};
+
+export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
   const [stageWidth] = STAGE_SIZE;
 
   const lastFireTime = useRef(0);

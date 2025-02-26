@@ -19,13 +19,12 @@ import { Player } from "./player";
 import { PerformanceStats } from "./performance-stats";
 import { ScoreText, ComboText } from "./text";
 
-export function PlayScene({
-  onGameOver,
-  onVictory,
-}: {
+type PlaySceneProps = {
   onGameOver: (score: number) => void;
   onVictory: (score: number) => void;
-}) {
+};
+
+export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   // Game state from Zustand

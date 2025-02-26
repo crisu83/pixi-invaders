@@ -1,13 +1,5 @@
 import { Sprite } from "pixi.js";
-import {
-  GameEntity,
-  GameComponent,
-  ExplosiveComponent,
-  SpriteComponent,
-  Point,
-  Size,
-  MovementComponent,
-} from "../types";
+import { GameEntity, GameComponent, Point, Size } from "../types";
 import { MutableRefObject } from "react";
 
 export const getComponent = <T extends GameComponent>(
@@ -16,6 +8,15 @@ export const getComponent = <T extends GameComponent>(
 ): T | undefined => {
   return entity.components?.find((c) => c.type === type) as T | undefined;
 };
+
+export type SpriteComponent = GameComponent &
+  Readonly<{
+    type: "SPRITE";
+    initialPosition: Point;
+    size: Size;
+    texture: string;
+    ref: MutableRefObject<Sprite | null>;
+  }>;
 
 export const createSpriteComponent = (
   position: Point,
@@ -55,6 +56,12 @@ export const getSpriteRef = (
   return spriteRef;
 };
 
+export type MovementComponent = GameComponent &
+  Readonly<{
+    type: "MOVEMENT";
+    velocity: Point;
+  }>;
+
 export const createMovementComponent = (
   velocity: Point = [0, 0]
 ): MovementComponent => ({
@@ -89,6 +96,14 @@ export const setVelocity = (
     ),
   };
 };
+
+export type ExplosiveComponent = GameComponent &
+  Readonly<{
+    type: "EXPLOSIVE";
+    alive: boolean;
+    texture: string;
+  }>;
+
 export const createExplosiveComponent = (
   texture: string
 ): ExplosiveComponent => ({

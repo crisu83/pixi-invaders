@@ -4,15 +4,13 @@ import { useState } from "react";
 import { Point } from "../types";
 import { STAGE_SIZE, SPRITE_SCALE } from "../constants";
 
-export function StarLayer({
-  texture,
-  speed = 1,
-  velocityRef,
-}: {
+type StarLayerProps = {
   texture: Texture;
   speed: number;
   velocityRef: React.RefObject<Point>;
-}) {
+};
+
+export function StarLayer({ texture, speed = 1, velocityRef }: StarLayerProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   const [position, setPosition] = useState<Point>([0, 0]);

@@ -2,17 +2,19 @@ import { GameEntity } from "../types";
 import { Missile } from "./missile";
 import { getSpriteRef } from "../utils/components";
 
+type MissileGroupProps = {
+  playerMissiles: GameEntity[];
+  enemyMissiles: GameEntity[];
+  onPlayerMissileDestroy: (id: number) => void;
+  onEnemyMissileDestroy: (id: number) => void;
+};
+
 export function MissileGroup({
   playerMissiles,
   enemyMissiles,
   onPlayerMissileDestroy,
   onEnemyMissileDestroy,
-}: {
-  playerMissiles: GameEntity[];
-  enemyMissiles: GameEntity[];
-  onPlayerMissileDestroy: (id: number) => void;
-  onEnemyMissileDestroy: (id: number) => void;
-}) {
+}: MissileGroupProps) {
   return (
     <>
       {playerMissiles.map((missile) => (

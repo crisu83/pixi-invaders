@@ -2,7 +2,11 @@ import { Container } from "@pixi/react";
 import { STAGE_SIZE } from "../constants";
 import { TitleText, FinalScoreText, PressAnyKeyText } from "./text";
 
-export function GameOverScene({ score }: { score: number }) {
+type GameOverSceneProps = {
+  score: number;
+};
+
+export function GameOverScene({ score }: GameOverSceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   return (

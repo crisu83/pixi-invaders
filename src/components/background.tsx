@@ -4,11 +4,11 @@ import { STARS_SIZE } from "../constants";
 import { StarLayer } from "./star-layer";
 import { useTexture } from "../hooks/use-texture";
 
-export function Background({
-  velocityRef,
-}: {
+type BackgroundProps = {
   velocityRef: React.RefObject<Point>;
-}) {
+};
+
+export function Background({ velocityRef }: BackgroundProps) {
   const stars1 = useTexture({
     path: "/sprites/stars_01.png",
     size: STARS_SIZE,

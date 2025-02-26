@@ -10,47 +10,48 @@ import {
   getSpriteTexture,
 } from "../utils/components";
 
-export const Explosion = forwardRef<
-  PixiSprite,
-  {
-    entity: GameEntity;
-    onComplete: () => void;
-  }
->(({ entity, onComplete }, ref) => {
-  const frameCount = 5;
+type ExplosionProps = {
+  entity: GameEntity;
+  onComplete: () => void;
+};
 
-  const animationFrame = useRef(0);
-  const animationTime = useRef(0);
+export const Explosion = forwardRef<PixiSprite, ExplosionProps>(
+  ({ entity, onComplete }, ref) => {
+    const frameCount = 5;
 
-  const textures = useSpriteSheet({
-    path: `/sprites/${getSpriteTexture(entity)}`,
-    frameCount,
-    size: EXPLOSION_SIZE,
-  });
+    const animationFrame = useRef(0);
+    const animationTime = useRef(0);
 
-  useTick((delta) => {
-    const sprite = getSpriteRef(entity).current;
-    if (!sprite) return;
+    const textures = useSpriteSheet({
+      path: `/sprites/${getSpriteTexture(entity)}`,
+      frameCount,
+      size: EXPLOSION_SIZE,
+    });
 
-    animationTime.current += delta * ANIMATION_SPEED;
-    if (animationTime.current >= 1) {
-      animationTime.current = 0;
-      animationFrame.current++;
-      if (animationFrame.current >= frameCount) {
-        onComplete();
-      } else {
-        sprite.texture = textures[animationFrame.current];
+    useTick((delta) => {
+      const sprite = getSpriteRef(entity).current;
+      if (!sprite) return;
+
+      animationTime.current += delta * ANIMATION_SPEED;
+      if (animationTime.current >= 1) {
+        animationTime.current = 0;
+        animationFrame.current++;
+        if (animationFrame.current >= frameCount) {
+          onComplete();
+        } else {
+          sprite.texture = textures[animationFrame.current];
+        }
       }
-    }
-  });
+    });
 
-  return animationFrame.current < frameCount ? (
-    <Sprite
-      anchor={0.5}
-      texture={textures[0]}
-      position={getSpriteInitialPosition(entity)}
-      scale={SPRITE_SCALE}
-      ref={ref}
-    />
-  ) : null;
-});
+    return animationFrame.current < frameCount ? (
+      <Sprite
+        anchor={0.5}
+        texture={textures[0]}
+        position={getSpriteInitialPosition(entity)}
+        scale={SPRITE_SCALE}
+        ref={ref}
+      />
+    ) : null;
+  }
+);

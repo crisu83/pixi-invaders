@@ -3,8 +3,7 @@ import { StartScene } from "./start-scene";
 import { VictoryScene } from "./victory-scene";
 import { GameOverScene } from "./game-over-scene";
 import { PlayScene } from "./play-scene";
-
-export type GameState = "START" | "PLAYING" | "VICTORY" | "GAME_OVER";
+import { GameState } from "../types";
 
 export function GameScene() {
   const [gameState, setGameState] = useState<GameState>("START");
