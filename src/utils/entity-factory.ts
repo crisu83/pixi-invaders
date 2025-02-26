@@ -4,13 +4,23 @@ import {
   EXPLOSION_SIZE,
   MISSILE_SIZE,
   PLAYER_SIZE,
-  VARIANT_TEXTURES,
 } from "../constants";
 import {
   createExplosiveComponent,
   createMovementComponent,
   createSpriteComponent,
 } from "./components";
+
+export const VARIANT_TEXTURES = {
+  MISSILE: {
+    PLAYER: "missile_01.png",
+    ENEMY: "missile_02.png",
+  },
+  EXPLOSION: {
+    PLAYER: "explosion_02.png",
+    ENEMY: "explosion_04.png",
+  },
+} as const;
 
 let nextEntityId = 1;
 

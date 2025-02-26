@@ -9,6 +9,7 @@ import { useInputStore } from "../stores/input-store";
 import { useMissileStore } from "../stores/missile-store";
 import { usePlayerStore } from "../stores/player-store";
 import { useScoreStore } from "../stores/score-store";
+import { useAudioStore } from "../stores/audio-store";
 import { useCollisionChecker } from "../utils/collision-checker";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -56,6 +57,8 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [renderTick, setRenderTick] = useState<number>(0);
   const [showStats, setShowStats] = useState<boolean>(false);
   const { isActionActive } = useInputStore();
+
+  const playSound = useAudioStore((state) => state.playSound);
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev: number) => prev + 1);
@@ -137,6 +140,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
       updatePlayer(setAlive(player, false));
       const explosion = createEntity("EXPLOSION", [sprite.x, sprite.y]);
       addExplosion(explosion);
+      playSound("EXPLOSION_1");
       updateRenderTick();
       setTimeout(() => onGameOver(score), 1000);
     }
@@ -149,6 +153,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     addExplosion,
     endGame,
     updateRenderTick,
+    playSound,
   ]);
 
   const handleEnemyDeath = useCallback(
@@ -162,11 +167,12 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
           "ENEMY"
         );
         addExplosion(explosion);
+        playSound("EXPLOSION_2");
         addScore(100);
         updateRenderTick();
       }
     },
-    [addExplosion, addScore, removeEnemy, updateRenderTick]
+    [addExplosion, addScore, removeEnemy, updateRenderTick, playSound]
   );
 
   // Handle stats toggle

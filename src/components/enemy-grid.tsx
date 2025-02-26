@@ -1,5 +1,5 @@
 import { Container, useTick } from "@pixi/react";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import {
   ENEMY_SPACING,
   ENEMY_SPEED,
@@ -10,6 +10,7 @@ import { Enemy } from "./enemy";
 import { STAGE_SIZE } from "../constants";
 import { GameEntity, Point } from "../types";
 import { getSpriteRef, isAlive } from "../utils/components";
+import { useAudioStore } from "../stores/audio-store";
 
 type EnemyGridProps = {
   enemies: GameEntity[];
@@ -22,6 +23,15 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
   const lastFireTime = useRef(0);
   const enemyDirection = useRef(1);
   const enemyPositions = useRef<Map<number, Point>>(new Map());
+  const playSound = useAudioStore((state) => state.playSound);
+
+  const handleMissileSpawn = useCallback(
+    (position: Point) => {
+      onMissileSpawn(position);
+      playSound("MISSILE_2");
+    },
+    [onMissileSpawn, playSound]
+  );
 
   useTick((delta) => {
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
@@ -79,7 +89,7 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
         if (frontEnemies.length > 0) {
           const shooter =
             frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
-          onMissileSpawn(shooter.position);
+          handleMissileSpawn(shooter.position);
           lastFireTime.current = currentTime;
         }
       }

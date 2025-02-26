@@ -20,6 +20,7 @@ import {
   setVelocity,
 } from "../utils/components";
 import { useInputStore } from "../stores/input-store";
+import { useAudioStore } from "../stores/audio-store";
 
 type PlayerProps = {
   entity: GameEntity;
@@ -39,8 +40,9 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       size: PLAYER_SIZE,
     });
 
-    // Get input state functions
-    const { isActionActive } = useInputStore();
+    // Get store functions
+    const isActionActive = useInputStore((state) => state.isActionActive);
+    const playSound = useAudioStore((state) => state.playSound);
 
     const [stageWidth] = STAGE_SIZE;
 
@@ -65,6 +67,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       // Handle shooting
       if (isActionActive("SHOOT")) {
         onMissileSpawn([sprite.x, sprite.y]);
+        playSound("MISSILE_1");
       }
 
       // Handle movement
