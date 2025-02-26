@@ -1,5 +1,5 @@
 import { Sprite, useTick } from "@pixi/react";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import { Sprite as PixiSprite } from "pixi.js";
 import {
   PLAYER_FRAMES,
@@ -7,7 +7,6 @@ import {
   PLAYER_SPEED,
   ANIMATION_SPEED,
   SPRITE_SCALE,
-  MISSILE_COOLDOWN,
   STAGE_SIZE,
   PLAYER_BOOST_MULTIPLIER,
   STAGE_MARGIN,
@@ -20,6 +19,7 @@ import {
   isAlive,
   setVelocity,
 } from "../utils/components";
+import { useInputStore } from "../stores/input-store";
 
 type PlayerProps = {
   entity: GameEntity;
@@ -39,41 +39,14 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       size: PLAYER_SIZE,
     });
 
-    const keysPressed = useRef<Set<string>>(new Set());
-    const lastShotTime = useRef(0);
+    // Get input state functions
+    const { isActionActive } = useInputStore();
 
     const [stageWidth] = STAGE_SIZE;
 
     // Calculate boundaries once
     const leftBound = -(stageWidth - STAGE_MARGIN * 2) / 2;
     const rightBound = (stageWidth - STAGE_MARGIN * 2) / 2;
-
-    useEffect(() => {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (!isAlive(entity)) return;
-        keysPressed.current.add(e.key);
-        if (e.code === "Space") {
-          const now = Date.now();
-          if (now - lastShotTime.current >= MISSILE_COOLDOWN) {
-            const sprite = getSpriteRef(entity).current;
-            if (sprite) {
-              onMissileSpawn([sprite.x, sprite.y]);
-            }
-            lastShotTime.current = now;
-          }
-        }
-      };
-      const handleKeyUp = (e: KeyboardEvent) => {
-        keysPressed.current.delete(e.key);
-      };
-
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-      };
-    }, [onMissileSpawn, entity]);
 
     useTick((delta) => {
       // Don't update position or animate if not alive
@@ -82,14 +55,20 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       const sprite = getSpriteRef(entity).current;
       if (!sprite) return;
 
-      const isBoostPressed = keysPressed.current.has("Shift");
+      const isBoostPressed = isActionActive("BOOST");
       const speed =
         PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
 
       let newAnimationState: PlayerAnimationState = "IDLE";
       let newVelocity: Point = [0, 0];
 
-      if (keysPressed.current.has("ArrowLeft")) {
+      // Handle shooting
+      if (isActionActive("SHOOT")) {
+        onMissileSpawn([sprite.x, sprite.y]);
+      }
+
+      // Handle movement
+      if (isActionActive("MOVE_LEFT")) {
         const nextX = Math.max(leftBound, sprite.x - speed);
         sprite.x = nextX;
         if (nextX > leftBound) {
@@ -99,7 +78,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
           ];
         }
         newAnimationState = "TILT_LEFT";
-      } else if (keysPressed.current.has("ArrowRight")) {
+      } else if (isActionActive("MOVE_RIGHT")) {
         const nextX = Math.min(rightBound, sprite.x + speed);
         sprite.x = nextX;
         if (nextX < rightBound) {

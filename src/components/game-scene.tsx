@@ -4,26 +4,30 @@ import { VictoryScene } from "./victory-scene";
 import { GameOverScene } from "./game-over-scene";
 import { PlayScene } from "./play-scene";
 import { GameState } from "../types";
+import { useInputStore } from "../stores/input-store";
 
 export function GameScene() {
   const [gameState, setGameState] = useState<GameState>("START");
   const [score, setScore] = useState(0);
+  const { isActionActive } = useInputStore();
 
   useEffect(() => {
-    const handleKeyPress = () => {
-      switch (gameState) {
-        case "START":
-        case "GAME_OVER":
-        case "VICTORY":
-          setGameState("PLAYING");
-          setScore(0);
-          break;
+    const checkSceneTransition = () => {
+      if (isActionActive("ANY")) {
+        switch (gameState) {
+          case "START":
+          case "GAME_OVER":
+          case "VICTORY":
+            setGameState("PLAYING");
+            setScore(0);
+            break;
+        }
       }
     };
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [gameState]);
+    const interval = setInterval(checkSceneTransition, 100);
+    return () => clearInterval(interval);
+  }, [gameState, isActionActive]);
 
   switch (gameState) {
     case "START":

@@ -20,6 +20,8 @@ export const MISSILE_SIZE: Size = [5, 20];
 export const MISSILE_SPEED = 8;
 export const MISSILE_COOLDOWN = 250;
 
+export const TOGGLE_COOLDOWN = 100;
+
 export const ENEMY_SIZE: Size = [20, 20];
 export const ENEMY_SPEED = 1;
 export const ENEMY_SPAWN_INTERVAL = 5000;

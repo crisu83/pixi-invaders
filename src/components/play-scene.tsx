@@ -2,12 +2,13 @@ import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
 import { STAGE_SIZE } from "../constants";
 import { GameEntity, Point } from "../types";
-import { useGameStore } from "../stores/game-store";
-import { useScoreStore } from "../stores/score-store";
-import { useExplosionStore } from "../stores/explosion-store";
-import { useMissileStore } from "../stores/missile-store";
 import { useEnemyStore } from "../stores/enemy-store";
+import { useExplosionStore } from "../stores/explosion-store";
+import { useGameStore } from "../stores/game-store";
+import { useInputStore } from "../stores/input-store";
+import { useMissileStore } from "../stores/missile-store";
 import { usePlayerStore } from "../stores/player-store";
+import { useScoreStore } from "../stores/score-store";
 import { useCollisionChecker } from "../utils/collision-checker";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -54,6 +55,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
   const [renderTick, setRenderTick] = useState<number>(0);
   const [showStats, setShowStats] = useState<boolean>(false);
+  const { isActionActive } = useInputStore();
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev: number) => prev + 1);
@@ -169,15 +171,15 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
   // Handle stats toggle
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Backquote") {
+    const checkStatsToggle = () => {
+      if (isActionActive("TOGGLE_STATS")) {
         setShowStats((prev) => !prev);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    const interval = setInterval(checkStatsToggle, 100);
+    return () => clearInterval(interval);
+  }, [isActionActive]);
 
   // Update game logic
   useTick(() => {
