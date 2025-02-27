@@ -1,6 +1,6 @@
 import { Text } from "@pixi/react";
-import { useTextStyle } from "../hooks/use-text-style";
 import { PropsWithChildren } from "react";
+import { useTextStyle } from "../hooks/use-text-style";
 import { Point } from "../types";
 
 type TitleTextProps = PropsWithChildren<{ y?: number }>;

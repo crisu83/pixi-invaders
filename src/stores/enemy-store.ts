@@ -1,12 +1,12 @@
 import { create } from "zustand";
+import {
+  ENEMIES_PER_ROW,
+  ENEMY_ROWS,
+  ENEMY_SPACING,
+  STAGE_SIZE,
+} from "../constants";
 import { GameEntity } from "../types";
 import { createEntity } from "../utils/entity-factory";
-import {
-  STAGE_SIZE,
-  ENEMY_ROWS,
-  ENEMIES_PER_ROW,
-  ENEMY_SPACING,
-} from "../constants";
 
 const [, stageHeight] = STAGE_SIZE;
 

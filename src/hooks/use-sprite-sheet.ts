@@ -1,5 +1,5 @@
+import { Rectangle, Texture } from "pixi.js";
 import { useMemo } from "react";
-import { Texture, Rectangle } from "pixi.js";
 import { Size } from "../types";
 import { useTexture } from "./use-texture";
 

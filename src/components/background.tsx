@@ -1,7 +1,7 @@
 import { Container } from "@pixi/react";
 import { STARS_SIZE } from "../constants";
-import { StarLayer } from "./star-layer";
 import { useTexture } from "../hooks/use-texture";
+import { StarLayer } from "./star-layer";
 
 export function Background() {
   const stars1 = useTexture({

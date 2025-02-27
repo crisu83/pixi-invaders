@@ -1,6 +1,6 @@
 import { GameEntity } from "../types";
-import { Explosion } from "./explosion";
 import { getSpriteRef } from "../utils/components";
+import { Explosion } from "./explosion";
 
 type ExplosionGroupProps = {
   explosions: GameEntity[];

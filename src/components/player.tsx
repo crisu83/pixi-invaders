@@ -1,26 +1,26 @@
 import { Sprite, useTick } from "@pixi/react";
-import { forwardRef, useRef } from "react";
 import { Sprite as PixiSprite } from "pixi.js";
+import { forwardRef, useRef } from "react";
 import {
+  ANIMATION_SPEED,
+  PLAYER_BOOST_MULTIPLIER,
   PLAYER_FRAMES,
   PLAYER_SIZE,
   PLAYER_SPEED,
-  ANIMATION_SPEED,
   SPRITE_SCALE,
-  STAGE_SIZE,
-  PLAYER_BOOST_MULTIPLIER,
   STAGE_MARGIN,
+  STAGE_SIZE,
 } from "../constants";
-import { GameEntity, Point, PlayerAnimationState } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import { useAudioStore } from "../stores/audio-store";
+import { useInputStore } from "../stores/input-store";
+import { GameEntity, PlayerAnimationState, Point } from "../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,
   isAlive,
   setVelocity,
 } from "../utils/components";
-import { useInputStore } from "../stores/input-store";
-import { useAudioStore } from "../stores/audio-store";
 
 type PlayerProps = {
   entity: GameEntity;

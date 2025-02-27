@@ -5,12 +5,11 @@ import {
   ENEMY_SPEED,
   MISSILE_COOLDOWN,
   STAGE_MARGIN,
-} from "../constants";
-import { Enemy } from "./enemy";
-import { STAGE_SIZE } from "../constants";
+ STAGE_SIZE } from "../constants";
+import { useAudioStore } from "../stores/audio-store";
 import { GameEntity, Point } from "../types";
 import { getSpriteRef, isAlive } from "../utils/components";
-import { useAudioStore } from "../stores/audio-store";
+import { Enemy } from "./enemy";
 
 type EnemyGridProps = {
   enemies: GameEntity[];

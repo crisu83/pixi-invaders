@@ -1,7 +1,7 @@
 import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
 import { STAGE_SIZE } from "../constants";
-import { GameEntity, Point } from "../types";
+import { useAudioStore } from "../stores/audio-store";
 import { useEnemyStore } from "../stores/enemy-store";
 import { useExplosionStore } from "../stores/explosion-store";
 import { useGameStore } from "../stores/game-store";
@@ -9,7 +9,7 @@ import { useInputStore } from "../stores/input-store";
 import { useMissileStore } from "../stores/missile-store";
 import { usePlayerStore } from "../stores/player-store";
 import { useScoreStore } from "../stores/score-store";
-import { useAudioStore } from "../stores/audio-store";
+import { GameEntity, Point } from "../types";
 import { useCollisionChecker } from "../utils/collision-checker";
 import { getSpriteRef, setAlive } from "../utils/components";
 import { createEntity } from "../utils/entity-factory";
@@ -17,9 +17,9 @@ import { Background } from "./background";
 import { EnemyGrid } from "./enemy-grid";
 import { ExplosionGroup } from "./explosion-group";
 import { MissileGroup } from "./missile-group";
-import { Player } from "./player";
 import { PerformanceStats } from "./performance-stats";
-import { ScoreText, ComboText } from "./text";
+import { Player } from "./player";
+import { ComboText, ScoreText } from "./text";
 
 type PlaySceneProps = {
   onGameOver: (score: number) => void;

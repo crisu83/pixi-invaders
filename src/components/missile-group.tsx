@@ -1,6 +1,6 @@
 import { GameEntity } from "../types";
-import { Missile } from "./missile";
 import { getSpriteRef } from "../utils/components";
+import { Missile } from "./missile";
 
 type MissileGroupProps = {
   playerMissiles: GameEntity[];

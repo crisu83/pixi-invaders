@@ -1,9 +1,9 @@
 import { Sprite, useTick } from "@pixi/react";
-import { forwardRef, useRef } from "react";
 import { Sprite as PixiSprite } from "pixi.js";
-import { ENEMY_SIZE, SPRITE_SCALE, ANIMATION_SPEED } from "../constants";
-import { GameEntity } from "../types";
+import { forwardRef, useRef } from "react";
+import { ANIMATION_SPEED, ENEMY_SIZE, SPRITE_SCALE } from "../constants";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import { GameEntity } from "../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,

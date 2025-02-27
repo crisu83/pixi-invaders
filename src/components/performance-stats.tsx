@@ -1,8 +1,8 @@
 import { Container, Text, useTick } from "@pixi/react";
 import { useEffect, useRef } from "react";
 import { useTextStyle } from "../hooks/use-text-style";
-import { Point } from "../types";
 import { useCollisionStore } from "../stores/collision-store";
+import { Point } from "../types";
 
 type PerformanceStatsProps = {
   renderTick: number;

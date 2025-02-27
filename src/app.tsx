@@ -1,8 +1,8 @@
 import { Stage } from "@pixi/react";
-import { STAGE_SIZE } from "./constants";
 import { AudioManager } from "./components/audio-manager";
 import { GameScene } from "./components/game-scene";
 import { InputManager } from "./components/input-manager";
+import { STAGE_SIZE } from "./constants";
 
 export function App() {
   const [stageWidth, stageHeight] = STAGE_SIZE;

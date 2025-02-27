@@ -1,10 +1,10 @@
-import { GameEntity, EntityType, Point, EntityVariant } from "../types";
 import {
   ENEMY_SIZE,
   EXPLOSION_SIZE,
   MISSILE_SIZE,
   PLAYER_SIZE,
 } from "../constants";
+import { EntityType, EntityVariant, GameEntity, Point } from "../types";
 import {
   createExplosiveComponent,
   createMovementComponent,

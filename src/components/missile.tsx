@@ -1,6 +1,6 @@
 import { Sprite, useTick } from "@pixi/react";
-import { forwardRef, useRef } from "react";
 import { Sprite as PixiSprite } from "pixi.js";
+import { forwardRef, useRef } from "react";
 import {
   ANIMATION_SPEED,
   MISSILE_SIZE,
@@ -8,8 +8,8 @@ import {
   SPRITE_SCALE,
   STAGE_SIZE,
 } from "../constants";
-import { GameEntity } from "../types";
 import { useSpriteSheet } from "../hooks/use-sprite-sheet";
+import { GameEntity } from "../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,

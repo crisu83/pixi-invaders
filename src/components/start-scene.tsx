@@ -1,6 +1,6 @@
 import { Container } from "@pixi/react";
 import { STAGE_SIZE } from "../constants";
-import { TitleText, ActionText } from "./text";
+import { ActionText, TitleText } from "./text";
 
 export function StartScene() {
   const [stageWidth, stageHeight] = STAGE_SIZE;
