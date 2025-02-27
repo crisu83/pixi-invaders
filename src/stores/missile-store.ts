@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GameEntity } from "../types";
+import { GameEntity } from "@/types";
 
 const initialState = {
   playerMissiles: [] as GameEntity[],

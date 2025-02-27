@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAudioStore } from "../../stores/audio-store";
-import { useInputStore } from "../../stores/input-store";
-import { GameState } from "../../types";
-import { GameOverScene } from "./game-over-scene";
-import { PlayScene } from "./play-scene";
-import { StartScene } from "./start-scene";
-import { VictoryScene } from "./victory-scene";
+import { GameOverScene } from "@/components/scenes/game-over-scene";
+import { PlayScene } from "@/components/scenes/play-scene";
+import { StartScene } from "@/components/scenes/start-scene";
+import { VictoryScene } from "@/components/scenes/victory-scene";
+import { useAudioStore } from "@/stores/audio-store";
+import { useInputStore } from "@/stores/input-store";
+import { GameState } from "@/types";
 
 export function GameScene() {
   const [gameState, setGameState] = useState<GameState>("START");

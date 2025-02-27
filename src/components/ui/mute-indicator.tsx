@@ -1,6 +1,6 @@
 import { Text } from "@pixi/react";
-import { useTextStyle } from "../../hooks/use-text-style";
-import { Point } from "../../types";
+import { useTextStyle } from "@/hooks/use-text-style";
+import { Point } from "@/types";
 
 type MuteIndicatorProps = {
   position: Point;

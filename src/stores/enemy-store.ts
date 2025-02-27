@@ -4,9 +4,9 @@ import {
   ENEMY_ROWS,
   ENEMY_SPACING,
   STAGE_SIZE,
-} from "../constants";
-import { GameEntity } from "../types";
-import { createEntity } from "../utils/entity-factory";
+} from "@/constants";
+import { GameEntity } from "@/types";
+import { createEntity } from "@/utils/entity-factory";
 
 const [, stageHeight] = STAGE_SIZE;
 

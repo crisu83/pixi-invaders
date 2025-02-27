@@ -3,8 +3,8 @@ import {
   EXPLOSION_SIZE,
   MISSILE_SIZE,
   PLAYER_SIZE,
-} from "../constants";
-import { EntityType, EntityVariant, GameEntity, Point } from "../types";
+} from "@/constants";
+import { EntityType, EntityVariant, GameEntity, Point } from "@/types";
 import {
   createExplosiveComponent,
   createMovementComponent,

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MISSILE_COOLDOWN, TOGGLE_COOLDOWN } from "../constants";
+import { MISSILE_COOLDOWN, TOGGLE_COOLDOWN } from "@/constants";
 
 type InputAction =
   | "MOVE_LEFT"

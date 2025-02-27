@@ -1,4 +1,4 @@
-import { PlayerAnimationState, Size } from "./types";
+import { PlayerAnimationState, Size } from "@/types";
 
 export const SPRITE_SCALE = 1;
 export const ANIMATION_SPEED = 0.1;

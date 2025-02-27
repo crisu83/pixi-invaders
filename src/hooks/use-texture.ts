@@ -1,6 +1,6 @@
 import { Rectangle, SCALE_MODES, Texture } from "pixi.js";
 import { useMemo } from "react";
-import { Size } from "../types";
+import { Size } from "@/types";
 
 type TextureConfig = {
   path: string;

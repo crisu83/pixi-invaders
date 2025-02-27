@@ -1,6 +1,6 @@
 import { Sprite } from "pixi.js";
 import { MutableRefObject } from "react";
-import { GameComponent, GameEntity, Point, Size } from "../types";
+import { GameComponent, GameEntity, Point, Size } from "@/types";
 
 export const getComponent = <T extends GameComponent>(
   entity: GameEntity,

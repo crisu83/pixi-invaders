@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { STAGE_SIZE } from "../constants";
-import { GameEntity, Point } from "../types";
-import { createEntity } from "../utils/entity-factory";
+import { STAGE_SIZE } from "@/constants";
+import { GameEntity, Point } from "@/types";
+import { createEntity } from "@/utils/entity-factory";
 
 const [, stageHeight] = STAGE_SIZE;
 

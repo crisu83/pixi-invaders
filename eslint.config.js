@@ -36,6 +36,12 @@ export default tseslint.config(
           'object',
           'type',
         ],
+        pathGroups: [
+          {
+            pattern: '@/**',
+            group: 'internal',
+          },
+        ],
         alphabetize: {
           order: 'asc',
           caseInsensitive: true,

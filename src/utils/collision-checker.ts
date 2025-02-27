@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { ENEMY_SIZE, MISSILE_SIZE, PLAYER_SIZE } from "../constants";
-import { useCollisionStore } from "../stores/collision-store";
-import { useEnemyStore } from "../stores/enemy-store";
-import { useMissileStore } from "../stores/missile-store";
-import { usePlayerStore } from "../stores/player-store";
-import { GameEntity, Size } from "../types";
-import { getSpriteRef } from "../utils/components";
+import { ENEMY_SIZE, MISSILE_SIZE, PLAYER_SIZE } from "@/constants";
+import { useCollisionStore } from "@/stores/collision-store";
+import { useEnemyStore } from "@/stores/enemy-store";
+import { useMissileStore } from "@/stores/missile-store";
+import { usePlayerStore } from "@/stores/player-store";
+import { GameEntity, Size } from "@/types";
+import { getSpriteRef } from "@/utils/components";
 
 type CollisionResult = {
   collision: boolean;

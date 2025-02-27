@@ -6,10 +6,10 @@ import {
   MISSILE_COOLDOWN,
   STAGE_MARGIN,
   STAGE_SIZE,
-} from "../../constants";
-import { useAudioStore } from "../../stores/audio-store";
-import { GameEntity, Point } from "../../types";
-import { getSpriteRef, isAlive } from "../../utils/components";
+} from "@/constants";
+import { useAudioStore } from "@/stores/audio-store";
+import { GameEntity, Point } from "@/types";
+import { getSpriteRef, isAlive } from "@/utils/components";
 import { Enemy } from "./enemy";
 
 type EnemyGridProps = {
