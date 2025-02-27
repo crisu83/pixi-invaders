@@ -1,5 +1,5 @@
-import { GameEntity } from "../types";
-import { getSpriteRef } from "../utils/components";
+import { GameEntity } from "../../types";
+import { getSpriteRef } from "../../utils/components";
 import { Missile } from "./missile";
 
 type MissileGroupProps = {

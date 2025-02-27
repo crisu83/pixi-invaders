@@ -1,8 +1,8 @@
 import { Container } from "@pixi/react";
 import { useEffect } from "react";
-import { STAGE_SIZE } from "../constants";
-import { useAudioStore } from "../stores/audio-store";
-import { ActionText, FinalScoreText, TitleText } from "./text";
+import { STAGE_SIZE } from "../../constants";
+import { useAudioStore } from "../../stores/audio-store";
+import { ActionText, FinalScoreText, TitleText } from "../ui/text";
 
 type GameOverSceneProps = {
   score: number;

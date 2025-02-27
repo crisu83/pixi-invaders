@@ -7,15 +7,15 @@ import {
   MISSILE_SPEED,
   SPRITE_SCALE,
   STAGE_SIZE,
-} from "../constants";
-import { useSpriteSheet } from "../hooks/use-sprite-sheet";
-import { GameEntity } from "../types";
+} from "../../constants";
+import { useSpriteSheet } from "../../hooks/use-sprite-sheet";
+import { GameEntity } from "../../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,
   getSpriteTexture,
   setVelocity,
-} from "../utils/components";
+} from "../../utils/components";
 
 type MissileProps = {
   entity: GameEntity;

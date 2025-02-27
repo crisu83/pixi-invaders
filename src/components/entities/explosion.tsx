@@ -1,14 +1,14 @@
 import { Sprite, useTick } from "@pixi/react";
 import { Sprite as PixiSprite } from "pixi.js";
 import { forwardRef, useRef } from "react";
-import { ANIMATION_SPEED, EXPLOSION_SIZE, SPRITE_SCALE } from "../constants";
-import { useSpriteSheet } from "../hooks/use-sprite-sheet";
-import { GameEntity } from "../types";
+import { ANIMATION_SPEED, EXPLOSION_SIZE, SPRITE_SCALE } from "../../constants";
+import { useSpriteSheet } from "../../hooks/use-sprite-sheet";
+import { GameEntity } from "../../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,
   getSpriteTexture,
-} from "../utils/components";
+} from "../../utils/components";
 
 type ExplosionProps = {
   entity: GameEntity;

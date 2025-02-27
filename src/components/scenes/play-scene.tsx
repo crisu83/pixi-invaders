@@ -1,25 +1,26 @@
 import { Container, useTick } from "@pixi/react";
 import { useCallback, useEffect, useState } from "react";
-import { STAGE_SIZE } from "../constants";
-import { useAudioStore } from "../stores/audio-store";
-import { useEnemyStore } from "../stores/enemy-store";
-import { useExplosionStore } from "../stores/explosion-store";
-import { useGameStore } from "../stores/game-store";
-import { useInputStore } from "../stores/input-store";
-import { useMissileStore } from "../stores/missile-store";
-import { usePlayerStore } from "../stores/player-store";
-import { useScoreStore } from "../stores/score-store";
-import { GameEntity, Point } from "../types";
-import { useCollisionChecker } from "../utils/collision-checker";
-import { getSpriteRef, setAlive } from "../utils/components";
-import { createEntity } from "../utils/entity-factory";
-import { Background } from "./background";
-import { EnemyGrid } from "./enemy-grid";
-import { ExplosionGroup } from "./explosion-group";
-import { MissileGroup } from "./missile-group";
-import { PerformanceStats } from "./performance-stats";
-import { Player } from "./player";
-import { ComboText, ScoreText } from "./text";
+import { STAGE_SIZE } from "../../constants";
+import { useAudioStore } from "../../stores/audio-store";
+import { useEnemyStore } from "../../stores/enemy-store";
+import { useExplosionStore } from "../../stores/explosion-store";
+import { useGameStore } from "../../stores/game-store";
+import { useInputStore } from "../../stores/input-store";
+import { useMissileStore } from "../../stores/missile-store";
+import { usePlayerStore } from "../../stores/player-store";
+import { useScoreStore } from "../../stores/score-store";
+import { GameEntity, Point } from "../../types";
+import { useCollisionChecker } from "../../utils/collision-checker";
+import { getSpriteRef, setAlive } from "../../utils/components";
+import { createEntity } from "../../utils/entity-factory";
+import { EnemyGrid } from "../entities/enemy-grid";
+import { ExplosionGroup } from "../entities/explosion-group";
+import { MissileGroup } from "../entities/missile-group";
+import { Player } from "../entities/player";
+import { Background } from "../ui/background";
+import { MuteIndicator } from "../ui/mute-indicator";
+import { PerformanceStats } from "../ui/performance-stats";
+import { ComboText, ScoreText } from "../ui/text";
 
 type PlaySceneProps = {
   onGameOver: (score: number) => void;
@@ -58,7 +59,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [showStats, setShowStats] = useState<boolean>(false);
   const { isActionActive } = useInputStore();
 
-  const { playSound, playMusic, stopMusic } = useAudioStore();
+  const { playSound, playMusic, stopMusic, muted } = useAudioStore();
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev: number) => prev + 1);
@@ -238,6 +239,10 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
         <ComboText
           combo={combo}
           position={[-stageWidth / 2 + 20, -stageHeight / 2 + 45]}
+        />
+        <MuteIndicator
+          position={[stageWidth / 2 - 20, -stageHeight / 2 + 45]}
+          visible={muted}
         />
         <PerformanceStats
           renderTick={renderTick}

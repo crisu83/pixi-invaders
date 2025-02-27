@@ -1,5 +1,5 @@
-import { STARS_SIZE } from "../constants";
-import { useTexture } from "../hooks/use-texture";
+import { STARS_SIZE } from "../../constants";
+import { useTexture } from "../../hooks/use-texture";
 import { StarLayer } from "./star-layer";
 
 export function Background() {

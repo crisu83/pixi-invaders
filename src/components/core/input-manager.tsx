@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useInputStore } from "../stores/input-store";
+import { useInputStore } from "../../stores/input-store";
 
 type InputManagerProps = {
   children: React.ReactNode;

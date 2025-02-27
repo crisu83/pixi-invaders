@@ -1,7 +1,7 @@
 import { Stage } from "@pixi/react";
 import { useEffect } from "react";
-import { GameScene } from "./components/game-scene";
-import { InputManager } from "./components/input-manager";
+import { InputManager } from "./components/core/input-manager";
+import { GameScene } from "./components/scenes/game-scene";
 import { STAGE_SIZE } from "./constants";
 import { useAudioStore } from "./stores/audio-store";
 

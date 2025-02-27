@@ -10,17 +10,17 @@ import {
   SPRITE_SCALE,
   STAGE_MARGIN,
   STAGE_SIZE,
-} from "../constants";
-import { useSpriteSheet } from "../hooks/use-sprite-sheet";
-import { useAudioStore } from "../stores/audio-store";
-import { useInputStore } from "../stores/input-store";
-import { GameEntity, PlayerAnimationState, Point } from "../types";
+} from "../../constants";
+import { useSpriteSheet } from "../../hooks/use-sprite-sheet";
+import { useAudioStore } from "../../stores/audio-store";
+import { useInputStore } from "../../stores/input-store";
+import { GameEntity, PlayerAnimationState, Point } from "../../types";
 import {
   getSpriteInitialPosition,
   getSpriteRef,
   isAlive,
   setVelocity,
-} from "../utils/components";
+} from "../../utils/components";
 
 type PlayerProps = {
   entity: GameEntity;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAudioStore } from "../stores/audio-store";
-import { useInputStore } from "../stores/input-store";
-import { GameState } from "../types";
+import { useAudioStore } from "../../stores/audio-store";
+import { useInputStore } from "../../stores/input-store";
+import { GameState } from "../../types";
 import { GameOverScene } from "./game-over-scene";
 import { PlayScene } from "./play-scene";
 import { StartScene } from "./start-scene";
