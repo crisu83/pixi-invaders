@@ -44,14 +44,16 @@ export const Explosion = forwardRef<PixiSprite, ExplosionProps>(
       }
     });
 
-    return animationFrame.current < frameCount ? (
-      <Sprite
-        anchor={0.5}
-        texture={textures[0]}
-        position={getSpriteInitialPosition(entity)}
-        scale={SPRITE_SCALE}
-        ref={ref}
-      />
-    ) : null;
+    return (
+      animationFrame.current < frameCount && (
+        <Sprite
+          anchor={0.5}
+          texture={textures[0]}
+          position={getSpriteInitialPosition(entity)}
+          scale={SPRITE_SCALE}
+          ref={ref}
+        />
+      )
+    );
   }
 );

@@ -105,12 +105,29 @@ export function PerformanceStats({
     return () => clearInterval(intervalId);
   }, [visible]);
 
-  return visible ? (
-    <Container position={position}>
-      <Text text={`FPS: ${fps.current}`} style={style} anchor={[1, 0]} />
-      <Text text={`UPS: ${ups.current}`} style={style} anchor={[1, 0]} y={15} />
-      <Text text={`RPS: ${rps.current}`} style={style} anchor={[1, 0]} y={30} />
-      <Text text={`CPS: ${cps.current}`} style={style} anchor={[1, 0]} y={45} />
-    </Container>
-  ) : null;
+  return (
+    visible && (
+      <Container position={position}>
+        <Text text={`FPS: ${fps.current}`} style={style} anchor={[1, 0]} />
+        <Text
+          text={`UPS: ${ups.current}`}
+          style={style}
+          anchor={[1, 0]}
+          y={15}
+        />
+        <Text
+          text={`RPS: ${rps.current}`}
+          style={style}
+          anchor={[1, 0]}
+          y={30}
+        />
+        <Text
+          text={`CPS: ${cps.current}`}
+          style={style}
+          anchor={[1, 0]}
+          y={45}
+        />
+      </Container>
+    )
+  );
 }

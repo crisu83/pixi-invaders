@@ -5,7 +5,8 @@ import {
   ENEMY_SPEED,
   MISSILE_COOLDOWN,
   STAGE_MARGIN,
- STAGE_SIZE } from "../constants";
+  STAGE_SIZE,
+} from "../constants";
 import { useAudioStore } from "../stores/audio-store";
 import { GameEntity, Point } from "../types";
 import { getSpriteRef, isAlive } from "../utils/components";
@@ -96,10 +97,10 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
   });
 
   return (
-    <Container>
+    <>
       {enemies.map((enemy) => (
         <Enemy key={enemy.id} entity={enemy} ref={getSpriteRef(enemy)} />
       ))}
-    </Container>
+    </>
   );
 }

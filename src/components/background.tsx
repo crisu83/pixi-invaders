@@ -1,4 +1,3 @@
-import { Container } from "@pixi/react";
 import { STARS_SIZE } from "../constants";
 import { useTexture } from "../hooks/use-texture";
 import { StarLayer } from "./star-layer";
@@ -20,10 +19,10 @@ export function Background() {
   });
 
   return (
-    <Container>
+    <>
       <StarLayer texture={stars1} speed={0.2} />
       <StarLayer texture={stars2} speed={0.4} />
       <StarLayer texture={stars3} speed={0.6} />
-    </Container>
+    </>
   );
 }

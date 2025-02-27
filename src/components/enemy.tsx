@@ -40,13 +40,15 @@ export const Enemy = forwardRef<PixiSprite, EnemyProps>(({ entity }, ref) => {
     }
   });
 
-  return isAlive(entity) ? (
-    <Sprite
-      anchor={0.5}
-      texture={textures[0]}
-      position={getSpriteInitialPosition(entity)}
-      scale={SPRITE_SCALE}
-      ref={ref}
-    />
-  ) : null;
+  return (
+    isAlive(entity) && (
+      <Sprite
+        anchor={0.5}
+        texture={textures[0]}
+        position={getSpriteInitialPosition(entity)}
+        scale={SPRITE_SCALE}
+        ref={ref}
+      />
+    )
+  );
 });
