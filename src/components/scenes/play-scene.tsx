@@ -17,7 +17,7 @@ import { useInputStore } from "@/stores/input-store";
 import { useMissileStore } from "@/stores/missile-store";
 import { usePlayerStore } from "@/stores/player-store";
 import { useScoreStore } from "@/stores/score-store";
-import { EnemyEntity, Point, MissileEntity, ExplosionEntity } from "@/types";
+import { EnemyEntity, Point } from "@/types";
 import { useCollisionChecker } from "@/utils/collision-checker";
 import { createEntity } from "@/utils/entity-factory";
 import { getSpriteRef } from "@/utils/entity-helpers";
@@ -83,7 +83,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const handlePlayerMissileSpawn = useCallback(
     (position: Point) => {
       const missile = createEntity("PLAYER_MISSILE", position);
-      addMissile(missile as MissileEntity);
+      addMissile(missile);
       updateRenderTick();
     },
     [addMissile, updateRenderTick]
@@ -92,7 +92,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const handleEnemyMissileSpawn = useCallback(
     (position: Point) => {
       const missile = createEntity("ENEMY_MISSILE", position);
-      addMissile(missile as MissileEntity);
+      addMissile(missile);
       updateRenderTick();
     },
     [addMissile, updateRenderTick]
@@ -121,7 +121,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     const deadPlayer = { ...player, alive: false };
     updatePlayer(deadPlayer);
     const explosion = createEntity("PLAYER_EXPLOSION", deadPlayer.position);
-    addExplosion(explosion as ExplosionEntity);
+    addExplosion(explosion);
     updateRenderTick();
     setTimeout(() => onGameOver(score), 1000);
   }, [
@@ -139,7 +139,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     (enemy: EnemyEntity) => {
       removeEnemy(enemy.id);
       const explosion = createEntity("ENEMY_EXPLOSION", enemy.position);
-      addExplosion(explosion as ExplosionEntity);
+      addExplosion(explosion);
       addScore(100);
       updateRenderTick();
     },
@@ -187,7 +187,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
       const missile = missileHit.entity1;
       const enemy = missileHit.entity2;
       removeMissile(missile.id);
-      handleEnemyDeath(enemy as EnemyEntity);
+      handleEnemyDeath(enemy);
     }
   });
 

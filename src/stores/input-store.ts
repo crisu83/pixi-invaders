@@ -32,8 +32,8 @@ type InputStore = Readonly<{
 }>;
 
 const DEFAULT_BINDINGS: readonly InputBinding[] = [
-  { keys: ["ArrowLeft"], action: "MOVE_LEFT" },
-  { keys: ["ArrowRight"], action: "MOVE_RIGHT" },
+  { keys: ["ArrowLeft", "KeyA"], action: "MOVE_LEFT" },
+  { keys: ["ArrowRight", "KeyD"], action: "MOVE_RIGHT" },
   { keys: ["Space"], action: "SHOOT", cooldown: MISSILE_COOLDOWN },
   { keys: ["ShiftLeft", "ShiftRight"], action: "BOOST" },
   { keys: ["Backquote"], action: "TOGGLE_STATS", cooldown: TOGGLE_COOLDOWN },

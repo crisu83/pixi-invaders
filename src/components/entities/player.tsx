@@ -23,7 +23,6 @@ type PlayerProps = {
 
 export const Player = forwardRef<PixiSprite, PlayerProps>(
   ({ entity, onMissileSpawn }, ref) => {
-    const position = useRef<Point>(entity.position);
     const animationState = useRef<PlayerAnimationState>("IDLE");
 
     const textures = useSpriteSheet({
@@ -52,25 +51,25 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       const speed =
         PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
       let newVelocity: Point = [0, 0];
-      let newPosition = position.current;
+      let newPosition = entity.position;
 
       // Handle shooting
       if (isActionActive("SHOOT")) {
-        onMissileSpawn(position.current);
+        onMissileSpawn(entity.position);
       }
 
       // Handle movement and animation state
       if (moveLeft) {
-        const nextX = Math.max(leftBound, position.current[0] - speed);
-        newPosition = [nextX, position.current[1]] as const;
+        const nextX = Math.max(leftBound, entity.position[0] - speed);
+        newPosition = [nextX, entity.position[1]] as const;
         newVelocity = [
           -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
           0,
         ] as const;
         animationState.current = "LEFT";
       } else if (moveRight) {
-        const nextX = Math.min(rightBound, position.current[0] + speed);
-        newPosition = [nextX, position.current[1]] as const;
+        const nextX = Math.min(rightBound, entity.position[0] + speed);
+        newPosition = [nextX, entity.position[1]] as const;
         newVelocity = [
           1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
           0,
@@ -79,9 +78,6 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       } else {
         animationState.current = "IDLE";
       }
-
-      // Update position ref for next frame
-      position.current = newPosition;
 
       // Create new player entity with updated properties
       const updatedPlayer: PlayerEntity = {
@@ -100,7 +96,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
         <Sprite
           anchor={0.5}
           texture={texture}
-          position={[position.current[0], position.current[1]]}
+          position={[entity.position[0], entity.position[1]]}
           scale={SPRITE_SCALE}
           ref={ref}
         />

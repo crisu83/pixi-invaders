@@ -33,6 +33,8 @@ export const useEnemyStore = create<EnemyState>((set) => ({
       enemies: state.enemies.filter((e) => e.id !== id),
     })),
 
+  updateEnemies: (enemies) => set({ enemies }),
+
   resetEnemies: () => {
     const newEnemies: EnemyEntity[] = [];
     for (const row of Array.from({ length: ENEMY_ROWS }, (_, i) => i)) {
@@ -44,6 +46,4 @@ export const useEnemyStore = create<EnemyState>((set) => ({
     }
     set({ enemies: newEnemies });
   },
-
-  updateEnemies: (enemies) => set({ enemies }),
 }));

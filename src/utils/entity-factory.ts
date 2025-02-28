@@ -6,7 +6,6 @@ import {
 } from "@/constants";
 import {
   EntityType,
-  GameEntity,
   Point,
   PlayerEntity,
   EnemyEntity,
@@ -16,14 +15,26 @@ import {
   EnemyExplosionEntity,
 } from "@/types";
 
+type EntityTypeToEntity = {
+  PLAYER: PlayerEntity;
+  ENEMY: EnemyEntity;
+  PLAYER_MISSILE: PlayerMissileEntity;
+  ENEMY_MISSILE: EnemyMissileEntity;
+  PLAYER_EXPLOSION: PlayerExplosionEntity;
+  ENEMY_EXPLOSION: EnemyExplosionEntity;
+};
+
 let nextEntityId = 1;
 
-export const createEntity = (type: EntityType, position: Point): GameEntity => {
+export const createEntity = <T extends EntityType>(
+  type: T,
+  position: Point
+): EntityTypeToEntity[T] => {
   const baseEntity = {
     id: nextEntityId++,
     position,
     spriteRef: { current: null },
-  };
+  } as const;
 
   switch (type) {
     case "PLAYER":
@@ -32,10 +43,10 @@ export const createEntity = (type: EntityType, position: Point): GameEntity => {
         type,
         size: PLAYER_SIZE,
         texture: "ship_01.png",
-        velocity: [0, 0],
+        velocity: [0, 0] as const,
         alive: true,
         explosionTexture: "explosion_02.png",
-      } as PlayerEntity;
+      } as unknown as EntityTypeToEntity[T];
     case "ENEMY":
       return {
         ...baseEntity,
@@ -44,36 +55,38 @@ export const createEntity = (type: EntityType, position: Point): GameEntity => {
         texture: "ship_02.png",
         alive: true,
         explosionTexture: "explosion_04.png",
-      } as EnemyEntity;
+      } as unknown as EntityTypeToEntity[T];
     case "PLAYER_MISSILE":
       return {
         ...baseEntity,
         type,
         size: MISSILE_SIZE,
         texture: "missile_01.png",
-        velocity: [0, 0],
-      } as PlayerMissileEntity;
+        velocity: [0, 0] as const,
+      } as unknown as EntityTypeToEntity[T];
     case "ENEMY_MISSILE":
       return {
         ...baseEntity,
         type,
         size: MISSILE_SIZE,
         texture: "missile_02.png",
-        velocity: [0, 0],
-      } as EnemyMissileEntity;
+        velocity: [0, 0] as const,
+      } as unknown as EntityTypeToEntity[T];
     case "PLAYER_EXPLOSION":
       return {
         ...baseEntity,
         type,
         size: EXPLOSION_SIZE,
         texture: "explosion_02.png",
-      } as PlayerExplosionEntity;
+      } as unknown as EntityTypeToEntity[T];
     case "ENEMY_EXPLOSION":
       return {
         ...baseEntity,
         type,
         size: EXPLOSION_SIZE,
         texture: "explosion_04.png",
-      } as EnemyExplosionEntity;
+      } as unknown as EntityTypeToEntity[T];
   }
+  // This should never happen due to the exhaustive type check
+  throw new Error(`Unknown entity type: ${type}`);
 };

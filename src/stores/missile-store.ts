@@ -11,6 +11,7 @@ type MissileState = Readonly<{
 
   // Actions
   addMissile: (missile: MissileEntity) => void;
+  updateMissile: (missile: MissileEntity) => void;
   removeMissile: (id: number) => void;
   resetMissiles: () => void;
 }>;
@@ -22,6 +23,11 @@ export const useMissileStore = create<MissileState>((set) => ({
   addMissile: (missile) =>
     set((state) => ({
       missiles: [...state.missiles, missile],
+    })),
+
+  updateMissile: (missile) =>
+    set((state) => ({
+      missiles: state.missiles.map((m) => (m.id === missile.id ? missile : m)),
     })),
 
   removeMissile: (id) =>
