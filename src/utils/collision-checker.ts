@@ -118,7 +118,6 @@ export function createCollisionChecker({
         if (!missileBounds) continue;
 
         for (const enemy of sortedEnemies) {
-          if (!enemy.alive) continue;
           const enemyBounds = getEntityBounds(enemy, ENEMY_SIZE);
           if (!enemyBounds) continue;
 
@@ -208,7 +207,6 @@ export function createCollisionChecker({
       }>(
         (lowest, enemy) => {
           checks++;
-          if (!enemy.alive) return lowest;
           const y = getEntityY(enemy);
           if (y !== null && (lowest.enemy === null || y > lowest.y)) {
             return { enemy, y };

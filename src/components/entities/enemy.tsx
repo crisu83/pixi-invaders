@@ -22,20 +22,16 @@ export const Enemy = forwardRef<PixiSprite, EnemyProps>(({ entity }, ref) => {
   });
 
   useTick((delta) => {
-    if (!entity.alive) return;
-
     updateAnimation(delta);
   });
 
   return (
-    entity.alive && (
-      <Sprite
-        anchor={0.5}
-        texture={texture}
-        position={[entity.position[0], entity.position[1]]}
-        scale={SPRITE_SCALE}
-        ref={ref}
-      />
-    )
+    <Sprite
+      anchor={0.5}
+      texture={texture}
+      position={[entity.position[0], entity.position[1]]}
+      scale={SPRITE_SCALE}
+      ref={ref}
+    />
   );
 });

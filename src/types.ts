@@ -24,14 +24,12 @@ export type PlayerEntity = BaseEntity &
   Readonly<{
     type: "PLAYER";
     velocity: Point;
-    alive: boolean;
     explosionTexture: string;
   }>;
 
 export type EnemyEntity = BaseEntity &
   Readonly<{
     type: "ENEMY";
-    alive: boolean;
     explosionTexture: string;
   }>;
 

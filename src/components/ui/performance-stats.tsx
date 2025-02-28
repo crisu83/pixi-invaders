@@ -107,7 +107,7 @@ export function PerformanceStats({
 
   return (
     visible && (
-      <Container position={position}>
+      <Container position={[position[0], position[1]]}>
         <Text text={`FPS: ${fps.current}`} style={style} anchor={[1, 0]} />
         <Text
           text={`UPS: ${ups.current}`}

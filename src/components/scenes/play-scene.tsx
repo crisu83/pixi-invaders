@@ -38,7 +38,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const { missiles, addMissile, removeMissile, resetMissiles } =
     useMissileStore();
   const { enemies, removeEnemy, resetEnemies } = useEnemyStore();
-  const { player, updatePlayer, resetPlayer } = usePlayerStore();
+  const { player, resetPlayer, removePlayer } = usePlayerStore();
 
   const {
     checkMissileEnemyCollisions,
@@ -131,10 +131,9 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     if (gameOver) return;
     endGame();
     if (!player) return;
-    const deadPlayer = { ...player, alive: false };
-    updatePlayer(deadPlayer);
-    const explosion = createEntity("PLAYER_EXPLOSION", deadPlayer.position);
+    const explosion = createEntity("PLAYER_EXPLOSION", player.position);
     addExplosion(explosion);
+    removePlayer();
     updateRenderTick();
     setTimeout(() => onGameOver(score), 1000);
   }, [
@@ -142,7 +141,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     score,
     gameOver,
     player,
-    updatePlayer,
+    removePlayer,
     addExplosion,
     endGame,
     updateRenderTick,

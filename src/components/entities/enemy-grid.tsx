@@ -35,9 +35,8 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
     let needsToMoveDown = false;
 
-    // Only check boundary collisions for alive enemies
+    // Only check boundary collisions for enemies
     const wouldHitBoundary = enemies.some((enemy) => {
-      if (!enemy.alive) return false;
       const newX = enemy.position[0] + moveAmount;
       return Math.abs(newX) > (stageWidth - STAGE_MARGIN * 2) / 2;
     });
@@ -49,8 +48,6 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
 
     // Create new enemy entities with updated positions
     const updatedEnemies = enemies.map((enemy) => {
-      if (!enemy.alive) return enemy;
-
       const newX = enemy.position[0] + (needsToMoveDown ? 0 : moveAmount);
       const newY = enemy.position[1] + (needsToMoveDown ? ENEMY_SPACING[1] : 0);
       return {
@@ -71,9 +68,7 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
           { enemy: EnemyEntity; lowestY: number }
         >();
 
-        // Only consider alive enemies
-        const aliveEnemies = enemies.filter((enemy) => enemy.alive);
-        for (const enemy of aliveEnemies) {
+        for (const enemy of enemies) {
           const x = Math.round(enemy.position[0]);
           const y = enemy.position[1];
           const current = columns.get(x);

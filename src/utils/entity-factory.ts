@@ -44,7 +44,6 @@ export const createEntity = <T extends EntityType>(
         size: PLAYER_SIZE,
         texture: "ship_01.png",
         velocity: [0, 0] as const,
-        alive: true,
         explosionTexture: "explosion_02.png",
       } as unknown as EntityTypeToEntity[T];
     case "ENEMY":
@@ -53,7 +52,6 @@ export const createEntity = <T extends EntityType>(
         type,
         size: ENEMY_SIZE,
         texture: "ship_02.png",
-        alive: true,
         explosionTexture: "explosion_04.png",
       } as unknown as EntityTypeToEntity[T];
     case "PLAYER_MISSILE":

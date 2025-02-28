@@ -42,8 +42,6 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
     const rightBound = (stageWidth - STAGE_MARGIN * 2) / 2;
 
     useTick((delta) => {
-      if (!entity.alive) return;
-
       const isBoostPressed = isActionActive("BOOST");
       const moveLeft = isActionActive("MOVE_LEFT");
       const moveRight = isActionActive("MOVE_RIGHT");
@@ -92,15 +90,13 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
     });
 
     return (
-      entity.alive && (
-        <Sprite
-          anchor={0.5}
-          texture={texture}
-          position={[entity.position[0], entity.position[1]]}
-          scale={SPRITE_SCALE}
-          ref={ref}
-        />
-      )
+      <Sprite
+        anchor={0.5}
+        texture={texture}
+        position={[entity.position[0], entity.position[1]]}
+        scale={SPRITE_SCALE}
+        ref={ref}
+      />
     );
   }
 );
