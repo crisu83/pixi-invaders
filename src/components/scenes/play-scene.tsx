@@ -5,8 +5,8 @@ import { ExplosionGroup } from "@/components/entities/explosion-group";
 import { MissileGroup } from "@/components/entities/missile-group";
 import { Player } from "@/components/entities/player";
 import { Background } from "@/components/ui/background";
-import { MuteIndicator } from "@/components/ui/mute-indicator";
 import { PerformanceStats } from "@/components/ui/performance-stats";
+import { MuteIndicator } from "@/components/ui/text";
 import { ComboText, ScoreText } from "@/components/ui/text";
 import { STAGE_SIZE } from "@/constants";
 import { useAudioStore } from "@/stores/audio-store";
@@ -49,9 +49,8 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
   const [renderTick, setRenderTick] = useState<number>(0);
   const [showStats, setShowStats] = useState<boolean>(false);
-  const { isActionActive } = useInputStore();
-
-  const { playMusic, stopMusic, muted } = useAudioStore();
+  const onToggle = useInputStore((state) => state.onToggle);
+  const { playMusic, stopMusic, muted, toggleMuted } = useAudioStore();
 
   const updateRenderTick = useCallback(() => {
     setRenderTick((prev: number) => prev + 1);
@@ -79,6 +78,20 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     playMusic();
     return () => stopMusic();
   }, [playMusic, stopMusic]);
+
+  // Handle stats and music toggles
+  useEffect(() => {
+    return onToggle((action) => {
+      switch (action) {
+        case "TOGGLE_STATS":
+          setShowStats((prev) => !prev);
+          break;
+        case "TOGGLE_MUSIC":
+          toggleMuted();
+          break;
+      }
+    });
+  }, [onToggle, toggleMuted]);
 
   const handlePlayerMissileSpawn = useCallback(
     (position: Point) => {
@@ -146,18 +159,6 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     [addExplosion, addScore, removeEnemy, updateRenderTick]
   );
 
-  // Handle stats toggle
-  useEffect(() => {
-    const checkStatsToggle = () => {
-      if (isActionActive("TOGGLE_STATS")) {
-        setShowStats((prev) => !prev);
-      }
-    };
-
-    const interval = setInterval(checkStatsToggle, 100);
-    return () => clearInterval(interval);
-  }, [isActionActive]);
-
   // Update game logic
   useTick(() => {
     if (!gameStarted) return;
@@ -206,7 +207,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
           position={[-stageWidth / 2 + 20, -stageHeight / 2 + 45]}
         />
         <MuteIndicator
-          position={[stageWidth / 2 - 20, -stageHeight / 2 + 45]}
+          position={[stageWidth / 2 - 20, stageHeight / 2 - 40]}
           visible={muted}
         />
         <PerformanceStats

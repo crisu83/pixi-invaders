@@ -64,7 +64,7 @@ export function ScoreText({ value, position }: ScoreTextProps) {
   return (
     <Text
       text={`SCORE ${value.toString().padStart(4, "0")}`}
-      position={position}
+      position={[position[0], position[1]]}
       style={style}
       anchor={[0, 0]}
     />
@@ -85,9 +85,29 @@ export function ComboText({ combo, position }: ComboTextProps) {
     <Text
       text={text}
       tint={0xff9900}
-      position={position}
+      position={[position[0], position[1]]}
       style={style}
       anchor={[0, 0]}
     />
+  );
+}
+
+type MuteIndicatorProps = {
+  position: Point;
+  visible: boolean;
+};
+
+export function MuteIndicator({ position, visible }: MuteIndicatorProps) {
+  const style = useTextStyle({ fontSize: 14 });
+
+  return (
+    visible && (
+      <Text
+        text="🔇 MUTED"
+        position={[position[0], position[1]]}
+        style={style}
+        anchor={[1, 0]}
+      />
+    )
   );
 }
