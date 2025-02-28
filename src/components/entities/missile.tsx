@@ -2,12 +2,12 @@ import { Sprite, useTick } from "@pixi/react";
 import { Sprite as PixiSprite } from "pixi.js";
 import { forwardRef, useRef, useEffect } from "react";
 import {
-  ANIMATION_SPEED,
   MISSILE_SIZE,
   MISSILE_SPEED,
   SPRITE_SCALE,
   STAGE_SIZE,
 } from "@/constants";
+import { useSpriteAnimation } from "@/hooks/use-sprite-animation";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
 import { useAudioStore } from "@/stores/audio-store";
 import { MissileEntity, Point } from "@/types";
@@ -21,10 +21,7 @@ export const Missile = forwardRef<PixiSprite, MissileProps>(
   ({ entity, onDestroy }, ref) => {
     const [, stageHeight] = STAGE_SIZE;
     const [, missileHeight] = MISSILE_SIZE;
-    const { playSound } = useAudioStore();
 
-    const animationFrame = useRef(0);
-    const animationTime = useRef(0);
     const position = useRef<Point>(entity.position);
 
     const textures = useSpriteSheet({
@@ -32,6 +29,11 @@ export const Missile = forwardRef<PixiSprite, MissileProps>(
       frameCount: 2,
       size: MISSILE_SIZE,
     });
+    const { texture, updateAnimation } = useSpriteAnimation({
+      textures,
+      frames: [0, 1],
+    });
+    const { playSound } = useAudioStore();
 
     // Play missile sound when component mounts
     useEffect(() => {
@@ -43,10 +45,9 @@ export const Missile = forwardRef<PixiSprite, MissileProps>(
       const direction = entity.type === "PLAYER_MISSILE" ? -1 : 1;
       const speed = direction * MISSILE_SPEED * delta;
 
-      // Update position and velocity
+      // Update position
       const nextY = position.current[1] + speed;
       position.current = [position.current[0], nextY];
-      entity.velocity = [0, direction * MISSILE_SPEED];
 
       // Check if off screen and destroy
       if (
@@ -57,18 +58,14 @@ export const Missile = forwardRef<PixiSprite, MissileProps>(
         return;
       }
 
-      // Animate
-      animationTime.current += delta * ANIMATION_SPEED;
-      if (animationTime.current >= 1) {
-        animationTime.current = 0;
-        animationFrame.current = (animationFrame.current + 1) % 2;
-      }
+      // Update animation
+      updateAnimation(delta);
     });
 
     return (
       <Sprite
         anchor={0.5}
-        texture={textures[animationFrame.current]}
+        texture={texture}
         position={[position.current[0], position.current[1]]}
         scale={SPRITE_SCALE}
         ref={ref}

@@ -2,7 +2,6 @@ import { Sprite, useTick } from "@pixi/react";
 import { Sprite as PixiSprite } from "pixi.js";
 import { forwardRef, useRef } from "react";
 import {
-  ANIMATION_SPEED,
   PLAYER_BOOST_MULTIPLIER,
   PLAYER_FRAMES,
   PLAYER_SIZE,
@@ -11,6 +10,7 @@ import {
   STAGE_MARGIN,
   STAGE_SIZE,
 } from "@/constants";
+import { useSpriteAnimation } from "@/hooks/use-sprite-animation";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
 import { useInputStore } from "@/stores/input-store";
 import { usePlayerStore } from "@/stores/player-store";
@@ -23,19 +23,20 @@ type PlayerProps = {
 
 export const Player = forwardRef<PixiSprite, PlayerProps>(
   ({ entity, onMissileSpawn }, ref) => {
-    const animationFrame = useRef(0);
-    const animationTime = useRef(0);
-    const animationState = useRef<PlayerAnimationState>("IDLE");
     const position = useRef<Point>(entity.position);
-    const updatePlayer = usePlayerStore((state) => state.updatePlayer);
+    const animationState = useRef<PlayerAnimationState>("IDLE");
 
     const textures = useSpriteSheet({
       path: "/sprites/ship_01.png",
       frameCount: 6,
       size: PLAYER_SIZE,
     });
-
+    const { texture, updateAnimation } = useSpriteAnimation({
+      textures,
+      frames: PLAYER_FRAMES[animationState.current],
+    });
     const isActionActive = useInputStore((state) => state.isActionActive);
+    const updatePlayer = usePlayerStore((state) => state.updatePlayer);
 
     const [stageWidth] = STAGE_SIZE;
     const leftBound = -(stageWidth - STAGE_MARGIN * 2) / 2;
@@ -50,7 +51,6 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
 
       const speed =
         PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-      let newAnimationState: PlayerAnimationState = "IDLE";
       let newVelocity: Point = [0, 0];
       let newPosition = position.current;
 
@@ -59,7 +59,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
         onMissileSpawn(position.current);
       }
 
-      // Handle movement
+      // Handle movement and animation state
       if (moveLeft) {
         const nextX = Math.max(leftBound, position.current[0] - speed);
         newPosition = [nextX, position.current[1]] as const;
@@ -67,7 +67,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
           -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
           0,
         ] as const;
-        newAnimationState = "LEFT";
+        animationState.current = "LEFT";
       } else if (moveRight) {
         const nextX = Math.min(rightBound, position.current[0] + speed);
         newPosition = [nextX, position.current[1]] as const;
@@ -75,7 +75,9 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
           1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
           0,
         ] as const;
-        newAnimationState = "RIGHT";
+        animationState.current = "RIGHT";
+      } else {
+        animationState.current = "IDLE";
       }
 
       // Update position ref for next frame
@@ -89,30 +91,15 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       };
       updatePlayer(updatedPlayer);
 
-      animationState.current = newAnimationState;
-
-      // Update animation frame
-      animationTime.current += delta * ANIMATION_SPEED;
-      if (animationTime.current >= 1) {
-        animationTime.current = 0;
-        const [firstFrame, lastFrame] = PLAYER_FRAMES[animationState.current];
-        if (
-          animationFrame.current < firstFrame ||
-          animationFrame.current > lastFrame
-        ) {
-          animationFrame.current = firstFrame;
-        } else {
-          animationFrame.current =
-            animationFrame.current === firstFrame ? lastFrame : firstFrame;
-        }
-      }
+      // Update animation
+      updateAnimation(delta);
     });
 
     return (
       entity.alive && (
         <Sprite
           anchor={0.5}
-          texture={textures[animationFrame.current]}
+          texture={texture}
           position={[position.current[0], position.current[1]]}
           scale={SPRITE_SCALE}
           ref={ref}
