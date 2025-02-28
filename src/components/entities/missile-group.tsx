@@ -1,38 +1,24 @@
-import { GameEntity } from "@/types";
-import { getSpriteRef } from "@/utils/components";
+import { MissileEntity } from "@/types";
+import { getSpriteRef } from "@/utils/entity-helpers";
 import { Missile } from "./missile";
 
 type MissileGroupProps = {
-  playerMissiles: GameEntity[];
-  enemyMissiles: GameEntity[];
-  onPlayerMissileDestroy: (id: number) => void;
-  onEnemyMissileDestroy: (id: number) => void;
+  missiles: MissileEntity[];
+  onMissileDestroy: (id: number) => void;
 };
 
 export function MissileGroup({
-  playerMissiles,
-  enemyMissiles,
-  onPlayerMissileDestroy,
-  onEnemyMissileDestroy,
+  missiles,
+  onMissileDestroy,
 }: MissileGroupProps) {
   return (
     <>
-      {playerMissiles.map((missile) => (
+      {missiles.map((missile) => (
         <Missile
           key={missile.id}
           entity={missile}
-          onDestroy={() => onPlayerMissileDestroy(missile.id)}
+          onDestroy={() => onMissileDestroy(missile.id)}
           ref={getSpriteRef(missile)}
-          direction={-1}
-        />
-      ))}
-      {enemyMissiles.map((missile) => (
-        <Missile
-          key={missile.id}
-          entity={missile}
-          onDestroy={() => onEnemyMissileDestroy(missile.id)}
-          ref={getSpriteRef(missile)}
-          direction={1}
         />
       ))}
     </>

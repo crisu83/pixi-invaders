@@ -12,27 +12,22 @@ import {
   STAGE_SIZE,
 } from "@/constants";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
-import { useAudioStore } from "@/stores/audio-store";
 import { useInputStore } from "@/stores/input-store";
-import { GameEntity, PlayerAnimationState, Point } from "@/types";
-import {
-  getSpriteInitialPosition,
-  getSpriteRef,
-  isAlive,
-  setVelocity,
-} from "@/utils/components";
+import { usePlayerStore } from "@/stores/player-store";
+import { PlayerEntity, PlayerAnimationState, Point } from "@/types";
 
 type PlayerProps = {
-  entity: GameEntity;
-  onMove: (velocity: Point) => void;
+  entity: PlayerEntity;
   onMissileSpawn: (position: Point) => void;
 };
 
 export const Player = forwardRef<PixiSprite, PlayerProps>(
-  ({ entity, onMove, onMissileSpawn }, ref) => {
+  ({ entity, onMissileSpawn }, ref) => {
     const animationFrame = useRef(0);
-    const animationState = useRef<PlayerAnimationState>("IDLE");
     const animationTime = useRef(0);
+    const animationState = useRef<PlayerAnimationState>("IDLE");
+    const position = useRef<Point>(entity.position);
+    const updatePlayer = usePlayerStore((state) => state.updatePlayer);
 
     const textures = useSpriteSheet({
       path: "/sprites/ship_01.png",
@@ -40,58 +35,60 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       size: PLAYER_SIZE,
     });
 
-    // Get store functions
     const isActionActive = useInputStore((state) => state.isActionActive);
-    const playSound = useAudioStore((state) => state.playSound);
 
     const [stageWidth] = STAGE_SIZE;
-
-    // Calculate boundaries once
     const leftBound = -(stageWidth - STAGE_MARGIN * 2) / 2;
     const rightBound = (stageWidth - STAGE_MARGIN * 2) / 2;
 
     useTick((delta) => {
-      // Don't update position or animate if not alive
-      if (!isAlive(entity)) return;
-
-      const sprite = getSpriteRef(entity).current;
-      if (!sprite) return;
+      if (!entity.alive) return;
 
       const isBoostPressed = isActionActive("BOOST");
+      const moveLeft = isActionActive("MOVE_LEFT");
+      const moveRight = isActionActive("MOVE_RIGHT");
+
       const speed =
         PLAYER_SPEED * delta * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1);
-
       let newAnimationState: PlayerAnimationState = "IDLE";
       let newVelocity: Point = [0, 0];
+      let newPosition = position.current;
 
       // Handle shooting
       if (isActionActive("SHOOT")) {
-        onMissileSpawn([sprite.x, sprite.y]);
-        playSound("MISSILE_1");
+        onMissileSpawn(position.current);
       }
 
       // Handle movement
-      if (isActionActive("MOVE_LEFT")) {
-        const nextX = Math.max(leftBound, sprite.x - speed);
-        sprite.x = nextX;
-        if (nextX > leftBound) {
-          newVelocity = [
-            -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
-            0,
-          ];
-        }
-        newAnimationState = "TILT_LEFT";
-      } else if (isActionActive("MOVE_RIGHT")) {
-        const nextX = Math.min(rightBound, sprite.x + speed);
-        sprite.x = nextX;
-        if (nextX < rightBound) {
-          newVelocity = [1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1), 0];
-        }
-        newAnimationState = "TILT_RIGHT";
+      if (moveLeft) {
+        const nextX = Math.max(leftBound, position.current[0] - speed);
+        newPosition = [nextX, position.current[1]] as const;
+        newVelocity = [
+          -1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
+          0,
+        ] as const;
+        newAnimationState = "LEFT";
+      } else if (moveRight) {
+        const nextX = Math.min(rightBound, position.current[0] + speed);
+        newPosition = [nextX, position.current[1]] as const;
+        newVelocity = [
+          1 * (isBoostPressed ? PLAYER_BOOST_MULTIPLIER : 1),
+          0,
+        ] as const;
+        newAnimationState = "RIGHT";
       }
 
-      setVelocity(entity, newVelocity);
-      onMove(newVelocity);
+      // Update position ref for next frame
+      position.current = newPosition;
+
+      // Create new player entity with updated properties
+      const updatedPlayer: PlayerEntity = {
+        ...entity,
+        position: newPosition,
+        velocity: newVelocity,
+      };
+      updatePlayer(updatedPlayer);
+
       animationState.current = newAnimationState;
 
       // Update animation frame
@@ -108,16 +105,15 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
           animationFrame.current =
             animationFrame.current === firstFrame ? lastFrame : firstFrame;
         }
-        sprite.texture = textures[animationFrame.current];
       }
     });
 
     return (
-      isAlive(entity) && (
+      entity.alive && (
         <Sprite
           anchor={0.5}
-          texture={textures[0]}
-          position={getSpriteInitialPosition(entity)}
+          texture={textures[animationFrame.current]}
+          position={[position.current[0], position.current[1]]}
           scale={SPRITE_SCALE}
           ref={ref}
         />

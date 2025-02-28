@@ -4,77 +4,76 @@ import {
   MISSILE_SIZE,
   PLAYER_SIZE,
 } from "@/constants";
-import { EntityType, EntityVariant, GameEntity, Point } from "@/types";
 import {
-  createExplosiveComponent,
-  createMovementComponent,
-  createSpriteComponent,
-} from "./components";
-
-export const VARIANT_TEXTURES = {
-  MISSILE: {
-    PLAYER: "missile_01.png",
-    ENEMY: "missile_02.png",
-  },
-  EXPLOSION: {
-    PLAYER: "explosion_02.png",
-    ENEMY: "explosion_04.png",
-  },
-} as const;
+  EntityType,
+  GameEntity,
+  Point,
+  PlayerEntity,
+  EnemyEntity,
+  PlayerMissileEntity,
+  EnemyMissileEntity,
+  PlayerExplosionEntity,
+  EnemyExplosionEntity,
+} from "@/types";
 
 let nextEntityId = 1;
 
-export const createEntity = (
-  type: EntityType,
-  position: Point,
-  variant: EntityVariant = "PLAYER"
-): GameEntity => {
-  const base = {
+export const createEntity = (type: EntityType, position: Point): GameEntity => {
+  const baseEntity = {
     id: nextEntityId++,
-    type,
-    components: [],
+    position,
+    spriteRef: { current: null },
   };
 
   switch (type) {
     case "PLAYER":
       return {
-        ...base,
-        components: [
-          createSpriteComponent(position, PLAYER_SIZE, "ship_01.png"),
-          createMovementComponent(),
-          createExplosiveComponent("explosion_02.png"),
-        ],
-      };
+        ...baseEntity,
+        type,
+        size: PLAYER_SIZE,
+        texture: "ship_01.png",
+        velocity: [0, 0],
+        alive: true,
+        explosionTexture: "explosion_02.png",
+      } as PlayerEntity;
     case "ENEMY":
       return {
-        ...base,
-        components: [
-          createSpriteComponent(position, ENEMY_SIZE, "ship_02.png"),
-          createExplosiveComponent("explosion_04.png"),
-        ],
-      };
-    case "MISSILE":
+        ...baseEntity,
+        type,
+        size: ENEMY_SIZE,
+        texture: "ship_02.png",
+        alive: true,
+        explosionTexture: "explosion_04.png",
+      } as EnemyEntity;
+    case "PLAYER_MISSILE":
       return {
-        ...base,
-        components: [
-          createSpriteComponent(
-            position,
-            MISSILE_SIZE,
-            VARIANT_TEXTURES.MISSILE[variant]
-          ),
-          createMovementComponent(),
-        ],
-      };
-    case "EXPLOSION":
+        ...baseEntity,
+        type,
+        size: MISSILE_SIZE,
+        texture: "missile_01.png",
+        velocity: [0, 0],
+      } as PlayerMissileEntity;
+    case "ENEMY_MISSILE":
       return {
-        ...base,
-        components: [
-          createSpriteComponent(
-            position,
-            EXPLOSION_SIZE,
-            VARIANT_TEXTURES.EXPLOSION[variant]
-          ),
-        ],
-      };
+        ...baseEntity,
+        type,
+        size: MISSILE_SIZE,
+        texture: "missile_02.png",
+        velocity: [0, 0],
+      } as EnemyMissileEntity;
+    case "PLAYER_EXPLOSION":
+      return {
+        ...baseEntity,
+        type,
+        size: EXPLOSION_SIZE,
+        texture: "explosion_02.png",
+      } as PlayerExplosionEntity;
+    case "ENEMY_EXPLOSION":
+      return {
+        ...baseEntity,
+        type,
+        size: EXPLOSION_SIZE,
+        texture: "explosion_04.png",
+      } as EnemyExplosionEntity;
   }
 };

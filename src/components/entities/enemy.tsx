@@ -3,15 +3,10 @@ import { Sprite as PixiSprite } from "pixi.js";
 import { forwardRef, useRef } from "react";
 import { ANIMATION_SPEED, ENEMY_SIZE, SPRITE_SCALE } from "@/constants";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
-import { GameEntity } from "@/types";
-import {
-  getSpriteInitialPosition,
-  getSpriteRef,
-  isAlive,
-} from "@/utils/components";
+import { EnemyEntity } from "@/types";
 
 type EnemyProps = {
-  entity: GameEntity;
+  entity: EnemyEntity;
 };
 
 export const Enemy = forwardRef<PixiSprite, EnemyProps>(({ entity }, ref) => {
@@ -26,26 +21,22 @@ export const Enemy = forwardRef<PixiSprite, EnemyProps>(({ entity }, ref) => {
 
   useTick((delta) => {
     // Don't animate or move if not alive
-    if (!isAlive(entity)) return;
-
-    const sprite = getSpriteRef(entity).current;
-    if (!sprite) return;
+    if (!entity.alive) return;
 
     // Animation logic
     animationTime.current += delta * ANIMATION_SPEED;
     if (animationTime.current >= 1) {
       animationTime.current = 0;
       animationFrame.current = (animationFrame.current + 1) % 2;
-      sprite.texture = textures[animationFrame.current];
     }
   });
 
   return (
-    isAlive(entity) && (
+    entity.alive && (
       <Sprite
         anchor={0.5}
-        texture={textures[0]}
-        position={getSpriteInitialPosition(entity)}
+        texture={textures[animationFrame.current]}
+        position={[entity.position[0], entity.position[1]]}
         scale={SPRITE_SCALE}
         ref={ref}
       />

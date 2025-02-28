@@ -7,30 +7,28 @@ import {
   STAGE_MARGIN,
   STAGE_SIZE,
 } from "@/constants";
-import { useAudioStore } from "@/stores/audio-store";
-import { GameEntity, Point } from "@/types";
-import { getSpriteRef, isAlive } from "@/utils/components";
+import { useEnemyStore } from "@/stores/enemy-store";
+import { EnemyEntity, Point } from "@/types";
+import { getSpriteRef } from "@/utils/entity-helpers";
 import { Enemy } from "./enemy";
 
 type EnemyGridProps = {
-  enemies: GameEntity[];
+  enemies: EnemyEntity[];
   onMissileSpawn: (position: Point) => void;
 };
 
 export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
   const [stageWidth] = STAGE_SIZE;
+  const { updateEnemies } = useEnemyStore();
 
   const lastFireTime = useRef(0);
   const enemyDirection = useRef(1);
-  const enemyPositions = useRef<Map<number, Point>>(new Map());
-  const playSound = useAudioStore((state) => state.playSound);
 
   const handleMissileSpawn = useCallback(
     (position: Point) => {
       onMissileSpawn(position);
-      playSound("MISSILE_2");
     },
-    [onMissileSpawn, playSound]
+    [onMissileSpawn]
   );
 
   useTick((delta) => {
@@ -39,9 +37,8 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
 
     // Only check boundary collisions for alive enemies
     const wouldHitBoundary = enemies.some((enemy) => {
-      const position = enemyPositions.current.get(enemy.id);
-      if (!isAlive(enemy) || !position) return false;
-      const newX = position[0] + moveAmount;
+      if (!enemy.alive) return false;
+      const newX = enemy.position[0] + moveAmount;
       return Math.abs(newX) > (stageWidth - STAGE_MARGIN * 2) / 2;
     });
 
@@ -50,38 +47,38 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
       needsToMoveDown = true;
     }
 
-    // Update enemy positions
-    enemies.forEach((enemy) => {
-      if (!isAlive(enemy)) return;
-      const sprite = getSpriteRef(enemy).current;
-      if (!sprite) return;
+    // Create new enemy entities with updated positions
+    const updatedEnemies = enemies.map((enemy) => {
+      if (!enemy.alive) return enemy;
 
-      const newX =
-        sprite.x +
-        (needsToMoveDown ? 0 : ENEMY_SPEED * delta * enemyDirection.current);
-      const newY = sprite.y + (needsToMoveDown ? ENEMY_SPACING[1] : 0);
-
-      sprite.x = newX;
-      sprite.y = newY;
-
-      enemyPositions.current.set(enemy.id, [newX, newY]);
+      const newX = enemy.position[0] + (needsToMoveDown ? 0 : moveAmount);
+      const newY = enemy.position[1] + (needsToMoveDown ? ENEMY_SPACING[1] : 0);
+      return {
+        ...enemy,
+        position: [newX, newY] as const,
+      };
     });
+
+    // Update all enemies at once
+    updateEnemies(updatedEnemies);
 
     // Random firing logic
     const currentTime = Date.now();
     if (currentTime - lastFireTime.current > MISSILE_COOLDOWN) {
       if (Math.random() < 0.02 && enemies.length > 0) {
-        const columns = new Map<number, { position: Point; lowestY: number }>();
+        const columns = new Map<
+          number,
+          { enemy: EnemyEntity; lowestY: number }
+        >();
 
         // Only consider alive enemies
-        for (const enemy of enemies.filter(isAlive)) {
-          const position = enemyPositions.current.get(enemy.id);
-          if (!position) continue;
-          const x = Math.round(position[0]);
-          const y = position[1];
+        const aliveEnemies = enemies.filter((enemy) => enemy.alive);
+        for (const enemy of aliveEnemies) {
+          const x = Math.round(enemy.position[0]);
+          const y = enemy.position[1];
           const current = columns.get(x);
           if (!current || y > current.lowestY) {
-            columns.set(x, { position, lowestY: y });
+            columns.set(x, { enemy, lowestY: y });
           }
         }
 
@@ -89,7 +86,7 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
         if (frontEnemies.length > 0) {
           const shooter =
             frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
-          handleMissileSpawn(shooter.position);
+          handleMissileSpawn(shooter.enemy.position);
           lastFireTime.current = currentTime;
         }
       }

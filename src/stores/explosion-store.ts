@@ -1,16 +1,16 @@
 import { create } from "zustand";
-import { GameEntity } from "@/types";
+import { ExplosionEntity } from "@/types";
 
 const initialState = {
-  explosions: [] as GameEntity[],
+  explosions: [] as ExplosionEntity[],
 } as const;
 
 type ExplosionState = Readonly<{
   // State
-  explosions: GameEntity[];
+  explosions: ExplosionEntity[];
 
   // Actions
-  addExplosion: (explosion: GameEntity) => void;
+  addExplosion: (explosion: ExplosionEntity) => void;
   removeExplosion: (id: number) => void;
   resetExplosions: () => void;
 }>;

@@ -4,13 +4,19 @@ import { useCollisionStore } from "@/stores/collision-store";
 import { useEnemyStore } from "@/stores/enemy-store";
 import { useMissileStore } from "@/stores/missile-store";
 import { usePlayerStore } from "@/stores/player-store";
-import { GameEntity, Size } from "@/types";
-import { getSpriteRef } from "@/utils/components";
+import {
+  PlayerEntity,
+  EnemyEntity,
+  MissileEntity,
+  Size,
+  GameEntity,
+} from "@/types";
+import { getSpriteRef } from "@/utils/entity-helpers";
 
-type CollisionResult = {
+type CollisionResult<T1 = never, T2 = never> = {
   collision: boolean;
-  entity1?: GameEntity;
-  entity2?: GameEntity;
+  entity1?: T1;
+  entity2?: T2;
 };
 
 type Bounds = {
@@ -32,7 +38,10 @@ function checkVerticalCollision(
 }
 
 // Get entity bounds
-function getEntityBounds(entity: GameEntity, size: Size): Bounds | null {
+function getEntityBounds<T extends GameEntity>(
+  entity: T,
+  size: Size
+): Bounds | null {
   const sprite = getSpriteRef(entity).current;
   if (!sprite) return null;
 
@@ -46,17 +55,17 @@ function getEntityBounds(entity: GameEntity, size: Size): Bounds | null {
 }
 
 // Get just the y-position of an entity (for simple vertical checks)
-function getEntityY(entity: GameEntity): number | null {
+function getEntityY<T extends GameEntity>(entity: T): number | null {
   const sprite = getSpriteRef(entity).current;
   return sprite ? sprite.y : null;
 }
 
 // Sort entities by vertical position
-function sortEntitiesByY(
-  entities: GameEntity[],
+function sortEntitiesByY<T extends GameEntity>(
+  entities: T[],
   size: Size,
   ascending: boolean = true
-): GameEntity[] {
+): T[] {
   return [...entities].sort((a, b) => {
     const boundsA = getEntityBounds(a, size);
     const boundsB = getEntityBounds(b, size);
@@ -68,10 +77,9 @@ function sortEntitiesByY(
 }
 
 type CollisionCheckerDeps = {
-  player: GameEntity | null;
-  enemies: GameEntity[];
-  playerMissiles: GameEntity[];
-  enemyMissiles: GameEntity[];
+  player: PlayerEntity | null;
+  enemies: EnemyEntity[];
+  missiles: MissileEntity[];
   addChecks: (checks: number) => void;
   resetChecks: () => void;
 };
@@ -79,8 +87,7 @@ type CollisionCheckerDeps = {
 export function createCollisionChecker({
   player,
   enemies,
-  playerMissiles,
-  enemyMissiles,
+  missiles,
   addChecks,
   resetChecks,
 }: CollisionCheckerDeps) {
@@ -90,8 +97,15 @@ export function createCollisionChecker({
   return {
     // Reset checks at the start of collision detection
     resetCollisionChecks: resetChecks,
-    checkMissileEnemyCollisions: (): CollisionResult => {
+
+    checkMissileEnemyCollisions: (): CollisionResult<
+      MissileEntity,
+      EnemyEntity
+    > => {
       let checks = 0;
+      const playerMissiles = missiles.filter(
+        (m) => m.type === "PLAYER_MISSILE"
+      );
       const sortedMissiles = sortEntitiesByY(
         playerMissiles,
         MISSILE_SIZE,
@@ -104,6 +118,7 @@ export function createCollisionChecker({
         if (!missileBounds) continue;
 
         for (const enemy of sortedEnemies) {
+          if (!enemy.alive) continue;
           const enemyBounds = getEntityBounds(enemy, ENEMY_SIZE);
           if (!enemyBounds) continue;
 
@@ -134,10 +149,14 @@ export function createCollisionChecker({
       return { collision: false };
     },
 
-    checkMissilePlayerCollisions: (): CollisionResult => {
+    checkMissilePlayerCollisions: (): CollisionResult<
+      MissileEntity,
+      PlayerEntity
+    > => {
       let checks = 0;
       if (!player || !playerBounds) return { collision: false };
 
+      const enemyMissiles = missiles.filter((m) => m.type === "ENEMY_MISSILE");
       for (const missile of enemyMissiles) {
         const missileBounds = getEntityBounds(missile, MISSILE_SIZE);
         if (!missileBounds) continue;
@@ -173,7 +192,10 @@ export function createCollisionChecker({
       return { collision: false };
     },
 
-    checkEnemyPlayerCollisions: (): CollisionResult => {
+    checkEnemyPlayerCollisions: (): CollisionResult<
+      EnemyEntity,
+      PlayerEntity
+    > => {
       let checks = 0;
       if (!player) return { collision: false };
 
@@ -181,11 +203,12 @@ export function createCollisionChecker({
       if (playerY === null) return { collision: false };
 
       const lowestEnemy = enemies.reduce<{
-        enemy: GameEntity | null;
+        enemy: EnemyEntity | null;
         y: number;
       }>(
         (lowest, enemy) => {
           checks++;
+          if (!enemy.alive) return lowest;
           const y = getEntityY(enemy);
           if (y !== null && (lowest.enemy === null || y > lowest.y)) {
             return { enemy, y };
@@ -211,7 +234,7 @@ export function createCollisionChecker({
 
 export function useCollisionChecker() {
   const { player } = usePlayerStore();
-  const { playerMissiles, enemyMissiles } = useMissileStore();
+  const { missiles } = useMissileStore();
   const { enemies } = useEnemyStore();
   const { addChecks, resetChecks } = useCollisionStore();
 
@@ -220,11 +243,10 @@ export function useCollisionChecker() {
       createCollisionChecker({
         player,
         enemies,
-        playerMissiles,
-        enemyMissiles,
+        missiles,
         addChecks,
         resetChecks,
       }),
-    [player, enemies, playerMissiles, enemyMissiles, addChecks, resetChecks]
+    [player, enemies, missiles, addChecks, resetChecks]
   );
 }

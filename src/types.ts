@@ -1,17 +1,71 @@
-export type Point = [number, number];
-export type Size = [number, number];
-export type PlayerAnimationState = "IDLE" | "TILT_LEFT" | "TILT_RIGHT";
-export type GameState = "START" | "PLAYING" | "VICTORY" | "GAME_OVER";
-export type ComponentType = "SPRITE" | "MOVEMENT" | "EXPLOSIVE";
-export type EntityType = "PLAYER" | "ENEMY" | "MISSILE" | "EXPLOSION";
-export type EntityVariant = "PLAYER" | "ENEMY";
+import { Sprite } from "pixi.js";
+import { MutableRefObject } from "react";
 
-export type GameComponent = Readonly<{
-  type: ComponentType;
-}>;
+export type Point = readonly [number, number];
+export type Size = readonly [number, number];
 
-export type GameEntity = Readonly<{
+export type EntityType =
+  | "PLAYER"
+  | "ENEMY"
+  | "PLAYER_MISSILE"
+  | "ENEMY_MISSILE"
+  | "PLAYER_EXPLOSION"
+  | "ENEMY_EXPLOSION";
+
+export type BaseEntity = Readonly<{
   id: number;
-  type: EntityType;
-  components: readonly GameComponent[];
+  position: Point;
+  spriteRef: MutableRefObject<Sprite | null>;
+  texture: string;
+  size: Size;
 }>;
+
+export type PlayerEntity = BaseEntity &
+  Readonly<{
+    type: "PLAYER";
+    velocity: Point;
+    alive: boolean;
+    explosionTexture: string;
+  }>;
+
+export type EnemyEntity = BaseEntity &
+  Readonly<{
+    type: "ENEMY";
+    alive: boolean;
+    explosionTexture: string;
+  }>;
+
+export type PlayerMissileEntity = BaseEntity &
+  Readonly<{
+    type: "PLAYER_MISSILE";
+    velocity: Point;
+  }>;
+
+export type EnemyMissileEntity = BaseEntity &
+  Readonly<{
+    type: "ENEMY_MISSILE";
+    velocity: Point;
+  }>;
+
+export type PlayerExplosionEntity = BaseEntity &
+  Readonly<{
+    type: "PLAYER_EXPLOSION";
+  }>;
+
+export type EnemyExplosionEntity = BaseEntity &
+  Readonly<{
+    type: "ENEMY_EXPLOSION";
+  }>;
+
+export type MissileEntity = PlayerMissileEntity | EnemyMissileEntity;
+
+export type ExplosionEntity = PlayerExplosionEntity | EnemyExplosionEntity;
+
+export type GameEntity =
+  | PlayerEntity
+  | EnemyEntity
+  | MissileEntity
+  | ExplosionEntity;
+
+export type PlayerAnimationState = "IDLE" | "LEFT" | "RIGHT";
+export type GameState = "START" | "PLAYING" | "VICTORY" | "GAME_OVER";

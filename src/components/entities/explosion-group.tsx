@@ -1,9 +1,9 @@
-import { GameEntity } from "@/types";
-import { getSpriteRef } from "@/utils/components";
+import { ExplosionEntity } from "@/types";
+import { getSpriteRef } from "@/utils/entity-helpers";
 import { Explosion } from "./explosion";
 
 type ExplosionGroupProps = {
-  explosions: GameEntity[];
+  explosions: ExplosionEntity[];
   onExplosionComplete: (id: number) => void;
 };
 
