@@ -6,6 +6,7 @@ export const ANIMATION_SPEED = 0.1;
 export const STAGE_SIZE: Size = [800, 600];
 export const STARS_SIZE: Size = [128, 128];
 export const STAGE_MARGIN = 100;
+export const BACKGROUND_SCROLL_SPEED = 0.1;
 
 export const PLAYER_SIZE: Size = [20, 20];
 export const PLAYER_SPEED = 3;
