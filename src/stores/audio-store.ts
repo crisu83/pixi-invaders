@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useInputStore } from "./input-store";
 
 const BACKGROUND_MUSIC = "oblanka-ian_aisling.mp3";
 
@@ -109,5 +110,14 @@ export const useAudioStore = create<AudioStore>((set, get) => ({
     music.preload = "auto";
 
     set({ soundCache: newCache, music });
+
+    // Subscribe to music toggle changes
+    useInputStore.subscribe((state) => {
+      const isMuted = state.isActionActive("TOGGLE_MUSIC");
+      const music = get().music;
+      if (music) {
+        music.volume = isMuted ? 0 : get().musicVolume;
+      }
+    });
   },
 }));

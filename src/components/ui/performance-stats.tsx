@@ -5,27 +5,19 @@ import { useCollisionStore } from "@/stores/collision-store";
 import { Point } from "@/types";
 
 type PerformanceStatsProps = {
-  renderTick: number;
   position: Point;
   visible: boolean;
 };
 
-export function PerformanceStats({
-  renderTick,
-  position,
-  visible,
-}: PerformanceStatsProps) {
+export function PerformanceStats({ position, visible }: PerformanceStatsProps) {
   const style = useTextStyle({ fontSize: 10 });
   const lastTime = useRef(performance.now());
   const frameCount = useRef(0);
   const updateTime = useRef(0);
-  const renderCount = useRef(0);
   const collisionCount = useRef(0);
   const fps = useRef(0);
   const ups = useRef(0);
-  const rps = useRef(0);
   const cps = useRef(0);
-  const lastRenderTick = useRef(renderTick);
   const rafId = useRef<number>();
 
   const { checksPerformed } = useCollisionStore();
@@ -35,22 +27,12 @@ export function PerformanceStats({
     if (!visible) {
       frameCount.current = 0;
       updateTime.current = 0;
-      renderCount.current = 0;
       collisionCount.current = 0;
       fps.current = 0;
       ups.current = 0;
-      rps.current = 0;
       cps.current = 0;
     }
   }, [visible]);
-
-  // Track React render ticks
-  useEffect(() => {
-    if (renderTick !== lastRenderTick.current) {
-      renderCount.current++;
-      lastRenderTick.current = renderTick;
-    }
-  }, [renderTick]);
 
   // Track frames using requestAnimationFrame
   useEffect(() => {
@@ -92,12 +74,10 @@ export function PerformanceStats({
 
       fps.current = Math.round((frameCount.current * 1000) / timeDelta);
       ups.current = Math.round((updateTime.current * 1000) / timeDelta);
-      rps.current = Math.round((renderCount.current * 1000) / timeDelta);
       cps.current = Math.round(collisionCount.current * (1000 / timeDelta));
 
       frameCount.current = 0;
       updateTime.current = 0;
-      renderCount.current = 0;
       collisionCount.current = 0;
       lastTime.current = time;
     }, 250); // Update 4 times per second
@@ -116,16 +96,10 @@ export function PerformanceStats({
           y={15}
         />
         <Text
-          text={`RPS: ${rps.current}`}
-          style={style}
-          anchor={[1, 0]}
-          y={30}
-        />
-        <Text
           text={`CPS: ${cps.current}`}
           style={style}
           anchor={[1, 0]}
-          y={45}
+          y={30}
         />
       </Container>
     )

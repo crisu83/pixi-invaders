@@ -1,5 +1,6 @@
 import { Container, useTick } from "@pixi/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { DebugOverlay } from "@/components/debug/debug-overlay";
 import { EnemyGrid } from "@/components/entities/enemy-grid";
 import { ExplosionGroup } from "@/components/entities/explosion-group";
 import { MissileGroup } from "@/components/entities/missile-group";
@@ -10,6 +11,7 @@ import { MuteIndicator } from "@/components/ui/text";
 import { ComboText, ScoreText } from "@/components/ui/text";
 import { STAGE_SIZE } from "@/constants";
 import { useAudioStore } from "@/stores/audio-store";
+import { useDebugStore } from "@/stores/debug-store";
 import { useEnemyStore } from "@/stores/enemy-store";
 import { useExplosionStore } from "@/stores/explosion-store";
 import { useGameStore } from "@/stores/game-store";
@@ -47,14 +49,9 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     resetCollisionChecks,
   } = useCollisionChecker();
 
-  const [renderTick, setRenderTick] = useState<number>(0);
-  const [showStats, setShowStats] = useState<boolean>(false);
+  const { showStats, toggleStats } = useDebugStore();
   const onToggle = useInputStore((state) => state.onToggle);
   const { playMusic, stopMusic, muted, toggleMuted } = useAudioStore();
-
-  const updateRenderTick = useCallback(() => {
-    setRenderTick((prev: number) => prev + 1);
-  }, []);
 
   // Initialize the game
   useEffect(() => {
@@ -79,73 +76,58 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     return () => stopMusic();
   }, [playMusic, stopMusic]);
 
-  // Handle stats and music toggles
+  // Handle toggles
   useEffect(() => {
     return onToggle((action) => {
       switch (action) {
         case "TOGGLE_STATS":
-          setShowStats((prev) => !prev);
+          toggleStats();
           break;
         case "TOGGLE_MUSIC":
           toggleMuted();
           break;
       }
     });
-  }, [onToggle, toggleMuted]);
+  }, [onToggle, toggleStats, toggleMuted]);
 
   const handlePlayerMissileSpawn = useCallback(
     (position: Point) => {
       const missile = createEntity("PLAYER_MISSILE", position);
       addMissile(missile);
-      updateRenderTick();
     },
-    [addMissile, updateRenderTick]
+    [addMissile]
   );
 
   const handleEnemyMissileSpawn = useCallback(
     (position: Point) => {
       const missile = createEntity("ENEMY_MISSILE", position);
       addMissile(missile);
-      updateRenderTick();
     },
-    [addMissile, updateRenderTick]
+    [addMissile]
   );
 
   const handleMissileDestroy = useCallback(
     (missileId: number) => {
       removeMissile(missileId);
-      updateRenderTick();
     },
-    [removeMissile, updateRenderTick]
+    [removeMissile]
   );
 
   const handleExplosionComplete = useCallback(
     (explosionId: number) => {
       removeExplosion(explosionId);
-      updateRenderTick();
     },
-    [removeExplosion, updateRenderTick]
+    [removeExplosion]
   );
 
   const handlePlayerDeath = useCallback(() => {
-    if (gameOver) return;
-    endGame();
     if (!player) return;
+    endGame();
     const explosion = createEntity("PLAYER_EXPLOSION", player.position);
-    addExplosion(explosion);
     removePlayer();
-    updateRenderTick();
+    addExplosion(explosion);
     setTimeout(() => onGameOver(score), 1000);
-  }, [
-    onGameOver,
-    score,
-    gameOver,
-    player,
-    removePlayer,
-    addExplosion,
-    endGame,
-    updateRenderTick,
-  ]);
+  }, [onGameOver, score, player, removePlayer, addExplosion, endGame]);
 
   const handleEnemyDeath = useCallback(
     (enemy: EnemyEntity) => {
@@ -153,20 +135,21 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
       const explosion = createEntity("ENEMY_EXPLOSION", enemy.position);
       addExplosion(explosion);
       addScore(100);
-      updateRenderTick();
     },
-    [addExplosion, addScore, removeEnemy, updateRenderTick]
+    [addExplosion, addScore, removeEnemy]
   );
 
   // Update game logic
   useTick(() => {
-    if (!gameStarted) return;
+    if (!gameStarted || gameOver) return;
 
     // Check for victory when all enemies are destroyed
     if (enemies.length === 0) {
-      onVictory(score);
+      setTimeout(() => onVictory(score), 1000);
       return;
     }
+
+    if (!player) return;
 
     // Reset collision checks at the start of each tick
     resetCollisionChecks();
@@ -210,7 +193,6 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
           visible={muted}
         />
         <PerformanceStats
-          renderTick={renderTick}
           position={[stageWidth / 2 - 20, -stageHeight / 2 + 15]}
           visible={showStats}
         />
@@ -229,6 +211,12 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
         <ExplosionGroup
           explosions={explosions}
           onExplosionComplete={handleExplosionComplete}
+        />
+        <DebugOverlay
+          player={player}
+          enemies={enemies}
+          missiles={missiles}
+          explosions={explosions}
         />
       </Container>
     </>
