@@ -1,5 +1,4 @@
 import { Container, useTick } from "@pixi/react";
-import { useCallback, useEffect } from "react";
 import { DebugOverlay } from "@/components/debug/debug-overlay";
 import { EnemyGrid } from "@/components/entities/enemy-grid";
 import { ExplosionGroup } from "@/components/entities/explosion-group";
@@ -10,18 +9,21 @@ import { PerformanceStats } from "@/components/ui/performance-stats";
 import { MuteIndicator } from "@/components/ui/text";
 import { ComboText, ScoreText } from "@/components/ui/text";
 import { STAGE_SIZE } from "@/constants";
+import { useDeaths } from "@/hooks/use-deaths";
+import { useExplosions } from "@/hooks/use-explosions";
+import { useGameInit } from "@/hooks/use-game-init";
+import { useMissiles } from "@/hooks/use-missiles";
+import { useMusic } from "@/hooks/use-music";
+import { useToggles } from "@/hooks/use-toggles";
 import { useAudioStore } from "@/stores/audio-store";
 import { useDebugStore } from "@/stores/debug-store";
 import { useEnemyStore } from "@/stores/enemy-store";
 import { useExplosionStore } from "@/stores/explosion-store";
 import { useGameStore } from "@/stores/game-store";
-import { useInputStore } from "@/stores/input-store";
 import { useMissileStore } from "@/stores/missile-store";
 import { usePlayerStore } from "@/stores/player-store";
 import { useScoreStore } from "@/stores/score-store";
-import { EnemyEntity, Point } from "@/types";
 import { useCollisionChecker } from "@/utils/collision-checker";
-import { createEntity } from "@/utils/entity-factory";
 import { getSpriteRef } from "@/utils/entity-helpers";
 
 type PlaySceneProps = {
@@ -33,14 +35,12 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
   // Game state from Zustand
-  const { gameStarted, gameOver, endGame, startGame } = useGameStore();
-  const { score, combo, addScore, resetScore } = useScoreStore();
-  const { explosions, addExplosion, removeExplosion, resetExplosions } =
-    useExplosionStore();
-  const { missiles, addMissile, removeMissile, resetMissiles } =
-    useMissileStore();
-  const { enemies, removeEnemy, resetEnemies } = useEnemyStore();
-  const { player, resetPlayer, removePlayer } = usePlayerStore();
+  const { gameStarted, gameOver } = useGameStore();
+  const { score, combo } = useScoreStore();
+  const { explosions } = useExplosionStore();
+  const { missiles } = useMissileStore();
+  const { enemies } = useEnemyStore();
+  const { player } = usePlayerStore();
 
   const {
     checkMissileEnemyCollisions,
@@ -49,95 +49,20 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     resetCollisionChecks,
   } = useCollisionChecker();
 
-  const { showStats, toggleStats } = useDebugStore();
-  const onToggle = useInputStore((state) => state.onToggle);
-  const { playMusic, stopMusic, muted, toggleMuted } = useAudioStore();
+  const { showStats } = useDebugStore();
+  const { muted } = useAudioStore();
 
-  // Initialize the game
-  useEffect(() => {
-    resetScore();
-    resetPlayer();
-    resetEnemies();
-    resetMissiles();
-    resetExplosions();
-    startGame();
-  }, [
-    resetScore,
-    resetPlayer,
-    resetEnemies,
-    resetMissiles,
-    resetExplosions,
-    startGame,
-  ]);
+  useGameInit();
+  useToggles();
+  useMusic();
 
-  // Play music when scene mounts, stop when unmounting
-  useEffect(() => {
-    playMusic();
-    return () => stopMusic();
-  }, [playMusic, stopMusic]);
-
-  // Handle toggles
-  useEffect(() => {
-    return onToggle((action) => {
-      switch (action) {
-        case "TOGGLE_STATS":
-          toggleStats();
-          break;
-        case "TOGGLE_MUSIC":
-          toggleMuted();
-          break;
-      }
-    });
-  }, [onToggle, toggleStats, toggleMuted]);
-
-  const handlePlayerMissileSpawn = useCallback(
-    (position: Point) => {
-      const missile = createEntity("PLAYER_MISSILE", position);
-      addMissile(missile);
-    },
-    [addMissile]
-  );
-
-  const handleEnemyMissileSpawn = useCallback(
-    (position: Point) => {
-      const missile = createEntity("ENEMY_MISSILE", position);
-      addMissile(missile);
-    },
-    [addMissile]
-  );
-
-  const handleMissileDestroy = useCallback(
-    (missileId: number) => {
-      removeMissile(missileId);
-    },
-    [removeMissile]
-  );
-
-  const handleExplosionComplete = useCallback(
-    (explosionId: number) => {
-      removeExplosion(explosionId);
-    },
-    [removeExplosion]
-  );
-
-  const handlePlayerDeath = useCallback(() => {
-    if (!player) return;
-    endGame();
-    const explosion = createEntity("PLAYER_EXPLOSION", player.position);
-    removePlayer();
-    addExplosion(explosion);
-    setTimeout(() => onGameOver(score), 1000);
-  }, [onGameOver, score, player, removePlayer, addExplosion, endGame]);
-
-  const handleEnemyDeath = useCallback(
-    (enemy: EnemyEntity) => {
-      removeEnemy(enemy.id);
-      const explosion = createEntity("ENEMY_EXPLOSION", enemy.position);
-      addExplosion(explosion);
-      addScore(100);
-    },
-    [addExplosion, addScore, removeEnemy]
-  );
+  const {
+    handlePlayerMissileSpawn,
+    handleEnemyMissileSpawn,
+    handleMissileDestroy,
+  } = useMissiles();
+  const { handleExplosionComplete } = useExplosions();
+  const { handlePlayerDeath, handleEnemyDeath } = useDeaths({ onGameOver });
 
   // Update game logic
   useTick(() => {
@@ -159,7 +84,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     const missileCollision = checkMissilePlayerCollisions();
     if (enemyCollision.collision || missileCollision.collision) {
       if (missileCollision.collision && missileCollision.entity1) {
-        removeMissile(missileCollision.entity1.id);
+        handleMissileDestroy(missileCollision.entity1.id);
       }
       handlePlayerDeath();
       return;
@@ -167,10 +92,8 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
     const missileHit = checkMissileEnemyCollisions();
     if (missileHit.collision && missileHit.entity1 && missileHit.entity2) {
-      const missile = missileHit.entity1;
-      const enemy = missileHit.entity2;
-      removeMissile(missile.id);
-      handleEnemyDeath(enemy);
+      handleMissileDestroy(missileHit.entity1.id);
+      handleEnemyDeath(missileHit.entity2);
     }
   });
 
