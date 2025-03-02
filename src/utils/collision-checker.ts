@@ -1,9 +1,7 @@
 import { useMemo } from "react";
 import { ENEMY_SIZE, MISSILE_SIZE, PLAYER_SIZE } from "@/constants";
 import { useCollisionStore } from "@/stores/collision-store";
-import { useEnemyStore } from "@/stores/enemy-store";
-import { useMissileStore } from "@/stores/missile-store";
-import { usePlayerStore } from "@/stores/player-store";
+import { useGameStore } from "@/stores/game-store";
 import {
   PlayerEntity,
   EnemyEntity,
@@ -231,9 +229,7 @@ export function createCollisionChecker({
 }
 
 export function useCollisionChecker() {
-  const { player } = usePlayerStore();
-  const { missiles } = useMissileStore();
-  const { enemies } = useEnemyStore();
+  const { player, enemies, missiles } = useGameStore();
   const { addChecks, resetChecks } = useCollisionStore();
 
   return useMemo(

@@ -1,5 +1,5 @@
 import { useTick } from "@pixi/react";
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
 import {
   ENEMY_SPACING,
   ENEMY_SPEED,
@@ -7,7 +7,7 @@ import {
   STAGE_MARGIN,
   STAGE_SIZE,
 } from "@/constants";
-import { useEnemyStore } from "@/stores/enemy-store";
+import { useGameStore } from "@/stores/game-store";
 import { EnemyEntity, Point } from "@/types";
 import { getSpriteRef } from "@/utils/entity-helpers";
 import { Enemy } from "./enemy";
@@ -19,17 +19,10 @@ type EnemyGridProps = {
 
 export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
   const [stageWidth] = STAGE_SIZE;
-  const { updateEnemies } = useEnemyStore();
+  const updateEnemies = useGameStore((state) => state.updateEnemies);
 
   const lastFireTime = useRef(0);
   const enemyDirection = useRef(1);
-
-  const handleMissileSpawn = useCallback(
-    (position: Point) => {
-      onMissileSpawn(position);
-    },
-    [onMissileSpawn]
-  );
 
   useTick((delta) => {
     const moveAmount = ENEMY_SPEED * delta * enemyDirection.current;
@@ -81,7 +74,7 @@ export function EnemyGrid({ enemies, onMissileSpawn }: EnemyGridProps) {
         if (frontEnemies.length > 0) {
           const shooter =
             frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
-          handleMissileSpawn(shooter.enemy.position);
+          onMissileSpawn(shooter.enemy.position);
           lastFireTime.current = currentTime;
         }
       }

@@ -12,8 +12,8 @@ import {
 } from "@/constants";
 import { useSpriteAnimation } from "@/hooks/use-sprite-animation";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
+import { useGameStore } from "@/stores/game-store";
 import { useInputStore } from "@/stores/input-store";
-import { usePlayerStore } from "@/stores/player-store";
 import { PlayerEntity, PlayerAnimationState, Point } from "@/types";
 
 type PlayerProps = {
@@ -35,7 +35,7 @@ export const Player = forwardRef<PixiSprite, PlayerProps>(
       frames: PLAYER_FRAMES[animationState.current],
     });
     const isActionActive = useInputStore((state) => state.isActionActive);
-    const updatePlayer = usePlayerStore((state) => state.updatePlayer);
+    const updatePlayer = useGameStore((state) => state.updatePlayer);
 
     const [stageWidth] = STAGE_SIZE;
     const leftBound = -(stageWidth - STAGE_MARGIN * 2) / 2;

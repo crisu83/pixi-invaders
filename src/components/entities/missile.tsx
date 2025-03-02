@@ -10,7 +10,7 @@ import {
 import { useSpriteAnimation } from "@/hooks/use-sprite-animation";
 import { useSpriteSheet } from "@/hooks/use-sprite-sheet";
 import { useAudioStore } from "@/stores/audio-store";
-import { useMissileStore } from "@/stores/missile-store";
+import { useGameStore } from "@/stores/game-store";
 import { MissileEntity, Point } from "@/types";
 
 type MissileProps = {
@@ -33,7 +33,7 @@ export const Missile = forwardRef<PixiSprite, MissileProps>(
       frames: [0, 1],
     });
     const { playSound } = useAudioStore();
-    const updateMissile = useMissileStore((state) => state.updateMissile);
+    const updateMissile = useGameStore((state) => state.updateMissile);
 
     // Play missile sound when component mounts
     useEffect(() => {

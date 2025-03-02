@@ -2,7 +2,7 @@ import { TilingSprite, useTick } from "@pixi/react";
 import { Texture } from "pixi.js";
 import { useRef } from "react";
 import { BACKGROUND_SCROLL_SPEED, SPRITE_SCALE, STAGE_SIZE } from "@/constants";
-import { usePlayerStore } from "@/stores/player-store";
+import { useGameStore } from "@/stores/game-store";
 import { Point } from "@/types";
 
 type StarLayerProps = {
@@ -13,7 +13,7 @@ type StarLayerProps = {
 export function StarLayer({ texture, speed = 1 }: StarLayerProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
-  const { player } = usePlayerStore();
+  const player = useGameStore((state) => state.player);
   const position = useRef<Point>([0, 0]);
 
   useTick((delta) => {

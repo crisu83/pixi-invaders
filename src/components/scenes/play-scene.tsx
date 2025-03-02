@@ -9,19 +9,11 @@ import { PerformanceStats } from "@/components/ui/performance-stats";
 import { MuteIndicator } from "@/components/ui/text";
 import { ComboText, ScoreText } from "@/components/ui/text";
 import { STAGE_SIZE } from "@/constants";
-import { useDeaths } from "@/hooks/use-deaths";
-import { useExplosions } from "@/hooks/use-explosions";
-import { useGameInit } from "@/hooks/use-game-init";
-import { useMissiles } from "@/hooks/use-missiles";
+import { useGame } from "@/hooks/use-game";
 import { useMusic } from "@/hooks/use-music";
 import { useToggles } from "@/hooks/use-toggles";
 import { useAudioStore } from "@/stores/audio-store";
 import { useDebugStore } from "@/stores/debug-store";
-import { useEnemyStore } from "@/stores/enemy-store";
-import { useExplosionStore } from "@/stores/explosion-store";
-import { useGameStore } from "@/stores/game-store";
-import { useMissileStore } from "@/stores/missile-store";
-import { usePlayerStore } from "@/stores/player-store";
 import { useScoreStore } from "@/stores/score-store";
 import { useCollisionChecker } from "@/utils/collision-checker";
 import { getSpriteRef } from "@/utils/entity-helpers";
@@ -34,13 +26,26 @@ type PlaySceneProps = {
 export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
   const [stageWidth, stageHeight] = STAGE_SIZE;
 
-  // Game state from Zustand
-  const { gameStarted, gameOver } = useGameStore();
+  // UI state
+  const { showStats } = useDebugStore();
+  const { muted } = useAudioStore();
   const { score, combo } = useScoreStore();
-  const { explosions } = useExplosionStore();
-  const { missiles } = useMissileStore();
-  const { enemies } = useEnemyStore();
-  const { player } = usePlayerStore();
+
+  // Game state and handlers
+  const {
+    gameStarted,
+    gameOver,
+    player,
+    enemies,
+    missiles,
+    explosions,
+    handlePlayerMissileSpawn,
+    handleEnemyMissileSpawn,
+    removeMissile,
+    removeExplosion,
+    handlePlayerDeath,
+    handleEnemyDeath,
+  } = useGame({ onGameOver, onVictory });
 
   const {
     checkMissileEnemyCollisions,
@@ -49,32 +54,12 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     resetCollisionChecks,
   } = useCollisionChecker();
 
-  const { showStats } = useDebugStore();
-  const { muted } = useAudioStore();
-
-  useGameInit();
-  useToggles();
   useMusic();
-
-  const {
-    handlePlayerMissileSpawn,
-    handleEnemyMissileSpawn,
-    handleMissileDestroy,
-  } = useMissiles();
-  const { handleExplosionComplete } = useExplosions();
-  const { handlePlayerDeath, handleEnemyDeath } = useDeaths({ onGameOver });
+  useToggles();
 
   // Update game logic
   useTick(() => {
     if (!gameStarted || gameOver) return;
-
-    // Check for victory when all enemies are destroyed
-    if (enemies.length === 0) {
-      setTimeout(() => onVictory(score), 1000);
-      return;
-    }
-
-    if (!player) return;
 
     // Reset collision checks at the start of each tick
     resetCollisionChecks();
@@ -84,7 +69,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
     const missileCollision = checkMissilePlayerCollisions();
     if (enemyCollision.collision || missileCollision.collision) {
       if (missileCollision.collision && missileCollision.entity1) {
-        handleMissileDestroy(missileCollision.entity1.id);
+        removeMissile(missileCollision.entity1.id);
       }
       handlePlayerDeath();
       return;
@@ -92,7 +77,7 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
 
     const missileHit = checkMissileEnemyCollisions();
     if (missileHit.collision && missileHit.entity1 && missileHit.entity2) {
-      handleMissileDestroy(missileHit.entity1.id);
+      removeMissile(missileHit.entity1.id);
       handleEnemyDeath(missileHit.entity2);
     }
   });
@@ -127,13 +112,10 @@ export function PlayScene({ onGameOver, onVictory }: PlaySceneProps) {
           />
         )}
         <EnemyGrid enemies={enemies} onMissileSpawn={handleEnemyMissileSpawn} />
-        <MissileGroup
-          missiles={missiles}
-          onMissileDestroy={handleMissileDestroy}
-        />
+        <MissileGroup missiles={missiles} onMissileDestroy={removeMissile} />
         <ExplosionGroup
           explosions={explosions}
-          onExplosionComplete={handleExplosionComplete}
+          onExplosionComplete={removeExplosion}
         />
         <DebugOverlay
           player={player}
